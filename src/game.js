@@ -2,8 +2,11 @@
   const $ = (id) => document.getElementById(id);
   const canvas = $("game"),
     ctx = canvas.getContext("2d"),
+    lightCanvas = document.createElement("canvas"),
+    lightCtx = lightCanvas.getContext("2d"),
     radar = $("radar"),
     rctx = radar.getContext("2d");
+  let pixelRatio = 1;
   const world = new GameWorld();
   const SAVE_KEY = "abyssal_reckoning_save_v1";
   let active = false,
@@ -13,7 +16,6 @@
     keys = {},
     pendingPing = false,
     audioVisualAssist = true,
-    hardcore = false,
     shake = 0;
   let selectedLevel = LEVELS[0],
     daily = { ...DAILY_LEVEL, seed: dailySeed() };
@@ -62,11 +64,12 @@
         card = document.createElement("button");
       card.type = "button";
       card.className = `mission-card${selectedLevel.id === level.id ? " selected" : ""}`;
-      card.innerHTML = `<span class="mission-card-depth">${level.depth === "DAILY" ? "DAILY TRENCH" : `DEPTH ${level.depth}M`}</span><strong>${level.title}</strong><small>${"★".repeat(rec.stars || 0)}${"☆".repeat(3 - (rec.stars || 0))} &nbsp; BEST ${rec.bestTime ? fmt(rec.bestTime) : "—"}</small><small>${rec.ghost ? "◈ GHOST SUB EARNED" : "GHOST SUB —"}${level.id === "daily" ? ` · ${new Date().toISOString().slice(0, 10)}` : ""}</small>`;
+      card.innerHTML = `<span class="mission-card-depth">${level.depth === "DAILY" ? "DAILY TRENCH" : `DEPTH ${level.depth}M`}</span><strong>${level.title}</strong><small>${"★".repeat(rec.stars || 0)}${"☆".repeat(3 - (rec.stars || 0))} &nbsp; BEST ${rec.bestTime ? fmt(rec.bestTime) : "—"}</small><small>${rec.ghost ? "◈ GHOST SUB EARNED" : "GHOST SUB —"}${level.id === "daily" ? ` · ${new Date().toISOString().slice(0, 10)}` : ""}</small><span class="mission-dive">DIVE ↗</span>`;
       card.addEventListener("click", () => {
         selectedLevel = level;
         updateSelected();
         renderMissions();
+        openMissionBriefing(level);
       });
       host.appendChild(card);
     });
@@ -81,10 +84,13 @@
   }
   function resize() {
     const rect = canvas.getBoundingClientRect(),
-      dpr = Math.min(devicePixelRatio || 1, 2);
+      dpr = pixelRatio = Math.min(devicePixelRatio || 1, 2);
     canvas.width = Math.max(1, rect.width * dpr);
     canvas.height = Math.max(1, rect.height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    lightCanvas.width = canvas.width;
+    lightCanvas.height = canvas.height;
+    lightCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const rr = radar.getBoundingClientRect();
     radar.width = Math.max(1, rr.width * dpr);
     radar.height = Math.max(1, rr.height * dpr);
@@ -101,6 +107,7 @@
     keys = {};
     pendingPing = false;
     $("briefing").classList.add("hidden");
+    $("mission-briefing").classList.add("hidden");
     $("play-screen").classList.remove("hidden");
     $("end-modal").classList.add("hidden");
     $("mission-status").textContent = "IN TRANSIT";
@@ -145,11 +152,12 @@
       if (e.type === "magnetar-lock") GameAudio.playCreatureVocalization("HUNTER", e.pan, e.distNorm);
       if (e.type === "magnetar-emp") { GameAudio.playMagnetarDischarge(); shake = Math.max(shake, 18); }
       if (e.type === "enemy-passive") GameAudio.playCreatureEcho(0, e.pan, Math.min(1, e.distNorm + 0.2));
-      if (e.type === "listener-windup") GameAudio.creatureRattle();
+      if (e.type === "listener-windup") { GameAudio.creatureRattle(); showToast("[HYDROPHONE: LISTENER]"); }
       if (e.type === "wall-stun") { GameAudio.creatureImpact(); shake = Math.max(shake, 10); }
       if (e.type === "enemy-mine-kill") { GameAudio.mineExplosion(); GameAudio.playMagnetarDischarge(); shake = Math.max(shake, 16); }
       if (e.type === "creature-brawl") { GameAudio.creatureImpact(); shake = Math.max(shake, 9); }
-      if (e.type === "stalker-tick") GameAudio.stalkerTick(e.distNorm);
+      if (e.type === "stalker-tick") { GameAudio.stalkerTick(e.distNorm); if (e.distNorm < .8) showToast("[HYDROPHONE: STALKER]"); }
+      if (e.type === "enemy-vocal") showToast("[HYDROPHONE: LISTENER]");
       if (e.type === "stalker-pinned" || e.type === "stalker-flee") GameAudio.stalkerScreech();
       if (e.type === "tactical-kill") showToast("[THREAT NEUTRALIZED: MINE DETONATION] +500 TACTICAL KILL");
       if (e.type === "decoy-ping") {
@@ -190,6 +198,11 @@
   function showToast(message) {
     const el = $("toast");
     el.textContent = message;
+    el.style.color = message.includes("SONAR ECHO: STONE") ? "#70edff"
+      : message.includes("BIO-MINE") ? "#ffc16d"
+      : message.includes("LISTENER") ? "#ff6475"
+      : message.includes("STALKER") || message.includes("MAGNETAR") ? "#d49aff"
+      : message.includes("EXIT BEACON") ? "#7ff0ae" : "";
     el.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove("show"), 2100);
@@ -205,9 +218,10 @@
       zoom = Math.min(rect.width / 760, rect.height / 570, 1.1),
       vw = rect.width / zoom,
       vh = rect.height / zoom;
-    let ox = Math.max(0, Math.min(world.width - vw, (hardcore ? p.estX : p.x) - vw / 2)),
-      oy = Math.max(0, Math.min(world.height - vh, (hardcore ? p.estY : p.y) - vh / 2));
-    if (shake > 0) {
+    const ox = p.x - vw / 2,
+      oy = p.y - vh / 2;
+    const hasShake = shake > 0;
+    if (hasShake) {
       const amount = shake;
       ctx.save();
       ctx.translate((Math.random() - .5) * amount, (Math.random() - .5) * amount);
@@ -216,23 +230,24 @@
     ctx.save();
     ctx.scale(zoom, zoom);
     ctx.translate(-ox, -oy);
-    // Reveal only the hull and, when powered, the 62 degree lamp beam.
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
-    if (p.lamp && p.battery > 0) {
-      ctx.moveTo(p.x, p.y);
-      ctx.arc(p.x, p.y, 380 * (p.lampIntensity || 1), p.angle - Math.PI * 31 / 180, p.angle + Math.PI * 31 / 180);
-      ctx.closePath();
-    }
-    ctx.clip();
     world.draw(ctx);
-    ctx.restore();
+    drawLighting(p, rect);
+    if (p.lamp && p.battery > 0) {
+      ctx.save(); ctx.globalCompositeOperation = "screen"; ctx.globalAlpha = .035;
+      ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+      for (let i = 0; i < 6; i++) {
+        const x = 55 + i * 48 + Math.sin(world.elapsed * 1.7 + i) * 7;
+        ctx.fillStyle = i % 2 ? "#8edfff" : "#c8efff";
+        ctx.beginPath(); ctx.ellipse(x, Math.sin(world.elapsed * 1.1 + i * 2) * 28, 1.4, 38, .12, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
     // Acoustic information is intentionally composited after the darkness clip.
     world.drawAcousticOverlay(ctx);
     ctx.restore();
-    if (shake > .2) ctx.restore(); else shake = 0;
-    drawHydrophone(rect.width, rect.height, (p.x - ox) * zoom, (p.y - oy) * zoom);
+    if (hasShake) ctx.restore();
+    if (shake <= .2) shake = 0;
+    drawHydrophone(rect.width, rect.height, rect.width / 2, rect.height / 2);
     drawCompass(rect.width, rect.height);
     drawRadar(now);
     drawInertialPlotter(rect.width, rect.height);
@@ -254,6 +269,45 @@
       ctx.fillStyle = "#b9ffe9"; ctx.font = "bold 12px monospace"; ctx.textAlign = "center";
       ctx.fillText("POSITION FIX ACQUIRED", rect.width / 2, 42); ctx.restore();
     }
+  }
+  function drawLighting(p, rect) {
+    const cx = rect.width / 2, cy = rect.height / 2;
+    lightCtx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    lightCtx.globalCompositeOperation = "source-over";
+    lightCtx.filter = "none";
+    lightCtx.clearRect(0, 0, rect.width, rect.height);
+    lightCtx.fillStyle = "rgba(0,0,0,1)";
+    lightCtx.fillRect(0, 0, rect.width, rect.height);
+    lightCtx.globalCompositeOperation = "destination-out";
+    const halo = lightCtx.createRadialGradient(cx, cy, 1, cx, cy, 22);
+    halo.addColorStop(0, "rgba(210,235,255,.045)");
+    halo.addColorStop(.45, "rgba(190,220,250,.02)");
+    halo.addColorStop(1, "rgba(170,210,245,0)");
+    lightCtx.fillStyle = halo;
+    lightCtx.beginPath(); lightCtx.arc(cx, cy, 22, 0, Math.PI * 2); lightCtx.fill();
+    if (p.lamp && p.battery > 0) {
+      lightCtx.save();
+      lightCtx.translate(cx, cy); lightCtx.rotate(p.angle);
+      const range = 380 * (p.lampIntensity || 1), halfAngle = Math.PI * 34 / 180;
+      const beam = lightCtx.createRadialGradient(0, 0, 12, 0, 0, range);
+      beam.addColorStop(0, "rgba(205,235,255,.94)");
+      beam.addColorStop(.38, "rgba(175,220,250,.72)");
+      beam.addColorStop(.72, "rgba(125,190,230,.4)");
+      beam.addColorStop(1, "rgba(85,150,205,0)");
+      lightCtx.fillStyle = beam;
+      lightCtx.filter = "blur(18px)";
+      lightCtx.beginPath(); lightCtx.moveTo(0, 0);
+      lightCtx.arc(0, 0, range, -halfAngle, halfAngle);
+      lightCtx.closePath(); lightCtx.fill();
+      lightCtx.filter = "none";
+      lightCtx.restore();
+    }
+    lightCtx.globalCompositeOperation = "source-over";
+    lightCtx.globalAlpha = 1;
+    ctx.save();
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    ctx.drawImage(lightCanvas, 0, 0, rect.width, rect.height);
+    ctx.restore();
   }
   function drawVignette(w, h) {
     const g = ctx.createRadialGradient(
@@ -318,7 +372,7 @@
     }
     const p = world.player,
       plot = (o, color, size) => {
-      const originX = hardcore ? p.estX : p.x, originY = hardcore ? p.estY : p.y;
+      const originX = p.x, originY = p.y;
       const dx = (o.x - originX) * scale,
         dy = (o.y - originY) * scale;
         if (Math.hypot(dx, dy) > Math.min(w, h) * 0.44) return;
@@ -346,10 +400,6 @@
     rctx.lineTo(-4, 3);
     rctx.fill();
     rctx.restore();
-    if (hardcore) {
-      rctx.strokeStyle = "#ffb566"; rctx.setLineDash([3, 3]);
-      rctx.beginPath(); rctx.moveTo(0, 0); rctx.lineTo((p.x-p.estX)*scale,(p.y-p.estY)*scale); rctx.stroke(); rctx.setLineDash([]);
-    }
     rctx.strokeStyle = "rgba(128,216,200,.4)";
     rctx.beginPath();
     rctx.moveTo(0, 0);
@@ -379,7 +429,7 @@
       const a=e.angle, age=e.age, rr=r+8+(i%3)*5;
       ctx.globalAlpha=Math.max(.2,1-age/2.8);ctx.strokeStyle=e.color;ctx.lineWidth=2;
       ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*(rr-4),cy+Math.sin(a)*(rr-4));ctx.lineTo(cx+Math.cos(a)*(rr+5),cy+Math.sin(a)*(rr+5));ctx.stroke();
-      if(audioVisualAssist){ctx.fillStyle=e.color;ctx.font="bold 8px monospace";ctx.textAlign="center";ctx.fillText(e.kind,cx+Math.cos(a)*(r+28),cy+Math.sin(a)*(r+25));}
+      if(audioVisualAssist){ctx.fillStyle=e.color;ctx.font="bold 8px monospace";ctx.textAlign="center";const names={STONE:"[SONAR ECHO: STONE]",MINE:"[SONAR ECHO: BIO-MINE]",FLESH:e.subtype==="lurker"?"[HYDROPHONE: STALKER]":e.subtype==="magnetar"?"[SONAR ECHO: MAGNETAR]":"[HYDROPHONE: LISTENER]",BEACON:"[OBJECTIVE: EXIT BEACON LOCKED]"};ctx.fillText(names[e.kind]||e.kind,cx+Math.cos(a)*(r+28),cy+Math.sin(a)*(r+25));}
     });
     world.enemies.filter((e)=>e.type==="listener"&&e.state==="WINDUP").forEach((e)=>{
       const a=Math.atan2(e.targetY-world.player.y,e.targetX-world.player.x)-world.player.angle;
@@ -403,7 +453,7 @@
       ctx.globalAlpha = 1;
       if (emp > 0.35) {
         ctx.fillStyle = "#dc8cff"; ctx.font = "bold 8px monospace"; ctx.textAlign = "center";
-        ctx.fillText("ELECTROMAGNETIC INTERFERENCE", cx, cy + r + 24);
+        ctx.fillText("[HYDROPHONE: MAGNETAR EMP FIELD]", cx, cy + r + 24);
       }
     }
     ctx.restore();
@@ -469,7 +519,7 @@
     $("end-battery").textContent = `${Math.round(100 - p.battery)}%`;
     $("end-hull").textContent = `${Math.round(p.hull)}%`;
     const baseScore = won ? Math.max(0, 1000 + Math.max(0, selectedLevel.parTime - time) * 8 + p.hull * 10 - p.pings * 12) : Math.max(0, Math.round(p.hull * 10 - p.pings * 12));
-    $("end-score").textContent = `${Math.round(baseScore * (hardcore ? 1.25 : 1))}${hardcore ? "  · 1.25×" : ""}`;
+    $("end-score").textContent = Math.round(baseScore);
     $("end-stars").textContent = "★".repeat(stars) + "☆".repeat(3 - stars);
     $("end-ghost").textContent = ghost ? "◈ EARNED" : "—";
     $("next-depth").classList.toggle(
@@ -485,7 +535,42 @@
     $("play-screen").classList.add("hidden");
     $("briefing").classList.remove("hidden");
     $("end-modal").classList.add("hidden");
+    $("mission-briefing").classList.add("hidden");
     renderMissions();
+  }
+  function enemyIntel(level) {
+    const creatures = [
+      ["listener", "A blind leviathan has entered the hydrophone band. Its calls arrive as pressure in the teeth; the silence between them is the part that listens."],
+      ["lurker", "A Shade Stalker moves where the lamp cannot hold the water. Retinal telemetry catches two violet points, then records them closing."],
+      ["magnetar", "Magnetar signature ahead: a cathedral-sized jellyfish wrapped in violet charge. Compass drift is rising; the pulses are beginning to answer one another."],
+    ];
+    const depthIndex = LEVELS.findIndex((entry) => entry.id === level.id);
+    const previouslySeen = new Set(
+      LEVELS.slice(0, Math.max(0, depthIndex))
+        .filter((entry) => entry.enemies)
+        .flatMap((entry) => Object.keys(entry.enemies).filter((type) => entry.enemies[type] > 0)),
+    );
+    const newCreature = creatures.find(([type]) => level.enemies?.[type] > 0 && !previouslySeen.has(type));
+    if (newCreature) return newCreature[1];
+
+    const logLines = [
+      "The sonar came back with one extra heartbeat. No one on watch admits to hearing it.",
+      "Five hundred meters down, the dark has learned our call sign. Something keeps answering on the same frequency.",
+      "Pressure steady. Hull quiet. Then three slow knocks from somewhere outside the light.",
+      "The trench is holding its breath. Our instruments insist the water is empty.",
+      "A clean return crossed the scope, matched our speed, then vanished without crossing behind us.",
+    ];
+    const seed = Number(level.seed) || 0;
+    return logLines[seed % logLines.length];
+  }
+  function openMissionBriefing(level = selectedLevel) {
+    selectedLevel = level;
+    $("briefing-depth").textContent = level.depth === "DAILY" ? "DAILY DEPTH · SEEDED RUN" : `${level.depth} METERS · ${level.title}`;
+    $("briefing-title").textContent = level.title;
+    $("briefing-objective").textContent = `Depth ${level.depth === "DAILY" ? "varies by seed" : `${level.depth} m`}. Hazard level: ${threatCount(level)} contacts and environmental threats. Primary objective: reach the exit beacon and return the vessel intact.`;
+    $("briefing-intel").textContent = enemyIntel(level);
+    $("briefing-meta").textContent = `${level.subtitle} · SEED ${level.seed} · EST. ${fmt(level.parTime)}`;
+    $("mission-briefing").classList.remove("hidden");
   }
   function customLevel() {
     const value = $("custom-seed").value.trim();
@@ -538,7 +623,7 @@
     if (e.code === "Space") {
       e.preventDefault();
       if (active && !world.over) triggerSonarPing(world.player.x, world.player.y, true);
-      else if (world.over && !world.won) start(selectedLevel);
+      else if (world.over && !world.won) openMissionBriefing(selectedLevel);
     }
     if (k === "q" && active && world.addDecoy()) {
       GameAudio.decoy();
@@ -570,18 +655,20 @@
   window.addEventListener("blur", () => (keys = {}));
   $("launch").addEventListener("click", () => {
     if (soundOn) GameAudio.enable();
-    start(selectedLevel);
+    openMissionBriefing(selectedLevel);
   });
   $("custom-launch").addEventListener("click", () => {
     customLevel();
     if (soundOn) GameAudio.enable();
-    start(selectedLevel);
+    openMissionBriefing(selectedLevel);
   });
-  $("retry").addEventListener("click", () => start(selectedLevel));
+  $("retry").addEventListener("click", () => openMissionBriefing(selectedLevel));
   $("next-depth").addEventListener("click", () => {
     const i = LEVELS.findIndex((l) => l.id === selectedLevel.id);
-    start(LEVELS[Math.min(i + 1, LEVELS.length - 1)]);
+    openMissionBriefing(LEVELS[Math.min(i + 1, LEVELS.length - 1)]);
   });
+  $("commence-dive").addEventListener("click", () => start(selectedLevel));
+  $("return-to-deck").addEventListener("click", showBriefing);
   $("dive-log").addEventListener("click", showBriefing);
   $("pause-button").addEventListener("click", togglePause);
   $("sound-toggle").addEventListener("click", () => {
@@ -597,7 +684,6 @@
     $("assist-toggle").querySelector("span").textContent = audioVisualAssist ? "ON" : "OFF";
     document.body.classList.toggle("high-contrast", audioVisualAssist);
   });
-  $("hardcore-toggle").addEventListener("change", (e) => { hardcore = e.target.checked; });
   document.querySelectorAll(".mobile-controls button").forEach((button) => {
     button.addEventListener("pointerdown", (e) => {
       e.preventDefault();

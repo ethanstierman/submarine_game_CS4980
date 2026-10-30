@@ -12,7 +12,7 @@
       content="Abyssal Reckoning — an acoustic stealth submarine game."
     />
     <title>Abyssal Reckoning</title>
-    <link rel="stylesheet" href="style.css?v=magnetar-20261030-2" />
+    <link rel="stylesheet" href="style.css?v=briefing-intel-20261030-1" />
   </head>
   <body>
     <main class="game-shell">
@@ -62,7 +62,6 @@
           <p class="launch-note">
             WASD STEER <span>·</span> SPACE PING <span>·</span> F LAMP
           </p>
-          <label class="mode-toggle"><input id="hardcore-toggle" type="checkbox" /> HARDCORE DEAD RECKONING <small>+25% SCORE</small></label>
           <div
             class="mission-select"
             id="mission-select"
@@ -99,6 +98,21 @@
           <div class="art-coordinates">HMS VIGILANT <span>·</span> 12.6 NM</div>
         </div>
       </section>
+
+      <div class="modal briefing-modal hidden" id="mission-briefing" role="dialog" aria-modal="true" aria-labelledby="briefing-title">
+        <div class="modal-card briefing-card">
+          <p class="eyebrow">TACTICAL BRIEFING <i></i> CLASSIFIED</p>
+          <p class="briefing-depth" id="briefing-depth"></p>
+          <h2 id="briefing-title">MISSION BRIEFING</h2>
+          <p id="briefing-objective"></p>
+          <div class="intel-block"><span>SENSOR / CAPTAIN’S LOG</span><p id="briefing-intel"></p></div>
+          <div class="briefing-meta" id="briefing-meta"></div>
+          <div class="briefing-actions">
+            <button class="launch-button" id="commence-dive" type="button"><span>COMMENCE DIVE</span><b>↗</b></button>
+            <button class="launch-button secondary" id="return-to-deck" type="button"><span>RETURN TO DECK</span><b>⌂</b></button>
+          </div>
+        </div>
+      </div>
 
       <section
         class="play-screen hidden"
@@ -254,8 +268,8 @@
         ><span>BUILT FOR THE DEEP <b>///</b> PHASE 01</span>
       </footer>
     </main>
-    <script src="audio.js?v=magnetar-20261030-2"></script>
-    <script src="world.js?v=magnetar-20261030-2"></script>
-    <script src="game.js?v=magnetar-20261030-2"></script>
+    <script src="audio.js?v=briefing-intel-20261030-1"></script>
+    <script src="world.js?v=briefing-intel-20261030-1"></script>
+    <script src="game.js?v=briefing-intel-20261030-1"></script>
   </body>
 </html>
