@@ -12,7 +12,7 @@
       content="Abyssal Reckoning — an acoustic stealth submarine game."
     />
     <title>Abyssal Reckoning</title>
-    <link rel="stylesheet" href="style.css?v=briefing-intel-20261030-1" />
+    <link rel="stylesheet" href="style.css?v=blackout-relays-20261101-7" />
   </head>
   <body>
     <main class="game-shell">
@@ -101,15 +101,15 @@
 
       <div class="modal briefing-modal hidden" id="mission-briefing" role="dialog" aria-modal="true" aria-labelledby="briefing-title">
         <div class="modal-card briefing-card">
-          <p class="eyebrow">TACTICAL BRIEFING <i></i> CLASSIFIED</p>
+          <p class="eyebrow">TACTICAL DIVE BRIEFING <i></i> CLASSIFIED</p>
           <p class="briefing-depth" id="briefing-depth"></p>
           <h2 id="briefing-title">MISSION BRIEFING</h2>
           <p id="briefing-objective"></p>
           <div class="intel-block"><span>SENSOR / CAPTAIN’S LOG</span><p id="briefing-intel"></p></div>
           <div class="briefing-meta" id="briefing-meta"></div>
           <div class="briefing-actions">
-            <button class="launch-button" id="commence-dive" type="button"><span>COMMENCE DIVE</span><b>↗</b></button>
-            <button class="launch-button secondary" id="return-to-deck" type="button"><span>RETURN TO DECK</span><b>⌂</b></button>
+            <button class="launch-button" id="commence-dive" type="button"><span>COMMENCE DIVE (SPACE)</span><b>↗</b></button>
+            <button class="launch-button secondary" id="return-to-deck" type="button"><span>ABORT TO DECK</span><b>⌂</b></button>
           </div>
         </div>
       </div>
@@ -126,11 +126,12 @@
             ><span id="mission-status">IN TRANSIT</span><i></i
             ><span id="mission-time">00:00</span>
           </div>
+          <div class="vent-status hidden" id="vent-status" aria-live="polite"></div>
           <div class="tactical-comms hidden" id="tactical-comms"></div>
           <div class="toast" id="toast" aria-live="polite"></div>
         <div class="pause-legend hidden" id="pause-legend" role="dialog" aria-label="Acoustic color legend">
           <strong>MISSION PAUSED · ACOUSTIC LEGEND</strong>
-          <span><i class="legend-rock"></i> ROCK RETURN</span><span><i class="legend-mine"></i> MINE !</span><span><i class="legend-bio"></i> FLESH</span><span><i class="legend-exit"></i> EXIT BEACON</span>
+          <span><i class="legend-rock"></i> ROCK RETURN</span><span><i class="legend-mine"></i> MINE !</span><span><i class="legend-bio"></i> FLESH</span><span><i class="legend-relay"></i> RELAY PYLON</span><span><i class="legend-exit"></i> EXIT BEACON</span>
           <small>ESC / P TO RESUME · M TO MUTE</small>
         </div>
         </div>
@@ -162,6 +163,7 @@
             </div>
             <div class="meter"><i id="battery-meter"></i></div>
           </div>
+          <div class="sonar-charge-readout hidden" id="sonar-charges" aria-live="polite"></div>
           <div class="mini-chart">
             <div class="mini-title">
               <span>TACTICAL PLOT</span><span>RANGE 8 NM</span>
@@ -268,8 +270,8 @@
         ><span>BUILT FOR THE DEEP <b>///</b> PHASE 01</span>
       </footer>
     </main>
-    <script src="audio.js?v=briefing-intel-20261030-1"></script>
-    <script src="world.js?v=briefing-intel-20261030-1"></script>
-    <script src="game.js?v=briefing-intel-20261030-1"></script>
+    <script src="audio.js?v=blackout-relays-20261101-7"></script>
+    <script src="world.js?v=blackout-relays-20261101-7"></script>
+    <script src="game.js?v=blackout-relays-20261101-7"></script>
   </body>
 </html>

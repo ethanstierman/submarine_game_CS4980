@@ -120,6 +120,12 @@
       h.lfoGain.gain.setTargetAtTime(level * 0.009, now, 0.12);
       if (h.out.pan) h.out.pan.setTargetAtTime(Math.max(-1, Math.min(1, Number.isFinite(pan) ? pan : 0)), now, 0.16);
     }
+    playRelayActivation() {
+      if (!this.enabled || !this.ctx) return;
+      [[440, 880, 0], [554, 1108, .07], [659, 1318, .14], [880, 1760, .21]].forEach(([freq, end, delay]) => {
+        this.tone({ freq, end, duration: .34, type: "sine", volume: .095, delay });
+      });
+    }
     playMagnetarLock(pan = 0, distNorm = 0) {
       if (!this.enabled || !this.ctx) return;
       const c = this.ctx, now = c.currentTime, out = this.spatialPan(pan) || this.master;
@@ -209,7 +215,7 @@
       if (panner) setTimeout(() => panner.disconnect(), (safeDelay + 0.5) * 1000);
       const tones = {
         STONE: [720, "sine"], MINE: [390, "triangle"], FLESH: [210, "sawtooth"],
-        BEACON: [960, "sine"], BATTERY: [1120, "triangle"],
+        BEACON: [960, "sine"], BATTERY: [1120, "triangle"], PYLON: [1380, "sine"],
       };
       const [freq, type] = tones[kind] || tones.STONE;
       const osc = c.createOscillator(), filter = c.createBiquadFilter(), gain = c.createGain();

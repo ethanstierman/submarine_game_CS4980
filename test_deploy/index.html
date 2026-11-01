@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#06151c" />
+    <meta
+      name="description"
+      content="Abyssal Reckoning — an acoustic stealth submarine game."
+    />
+    <title>Abyssal Reckoning</title>
+    <link rel="stylesheet" href="style.css?v=blackout-relays-20261101-7" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Abyssal Reckoning home"
+          ><span class="brand-mark">◈</span
+          ><span>ABYSSAL <b>RECKONING</b></span></a
+        >
+        <div class="mission-tag">
+          <span class="live-dot"></span> NORTH ATLANTIC · 04:17
+        </div>
+        <button
+          class="sound-toggle"
+          id="sound-toggle"
+          type="button"
+          aria-label="Toggle sound"
+        >
+          SOUND <span id="sound-state">OFF</span>
+        </button>
+        <button class="sound-toggle assist-toggle" id="assist-toggle" type="button" aria-pressed="true">AUDIO-VISUAL ASSIST <span>ON</span></button>
+      </header>
+
+      <section class="briefing" id="briefing" aria-labelledby="title">
+        <div class="briefing-copy">
+          <p class="eyebrow"><span>OPERATION 01</span><i></i> CLASSIFIED</p>
+          <h1 id="title">THE SILENT<br /><em>PASSAGE</em></h1>
+          <p class="intro">
+            Choose a depth and chart a course through the trench. Learn the
+            threats, manage your battery, and reach the exit beacon.
+          </p>
+          <div class="mission-stats">
+            <div>
+              <small>SELECTED</small
+              ><strong id="selected-depth">100 <sup>M</sup></strong>
+            </div>
+            <div>
+              <small>THREATS</small
+              ><strong id="selected-threats">07 <sup>HAZARDS</sup></strong>
+            </div>
+            <div>
+              <small>SEED</small><strong id="selected-seed">100173</strong>
+            </div>
+          </div>
+          <button class="launch-button" id="launch" type="button">
+            <span>BEGIN DIVE</span><b>↗</b>
+          </button>
+          <p class="launch-note">
+            WASD STEER <span>·</span> SPACE PING <span>·</span> F LAMP
+          </p>
+          <div
+            class="mission-select"
+            id="mission-select"
+            aria-label="Select mission"
+          ></div>
+          <div class="custom-seed">
+            <label for="custom-seed">CUSTOM SEED</label
+            ><input
+              id="custom-seed"
+              inputmode="numeric"
+              placeholder="Enter a seed"
+            /><button id="custom-launch" type="button">CHART DIVE</button>
+          </div>
+        </div>
+        <div class="briefing-art" aria-hidden="true">
+          <div class="chart-grid"></div>
+          <div class="chart-ring ring-a"></div>
+          <div class="chart-ring ring-b"></div>
+          <div class="chart-cross"></div>
+          <div class="depth-label depth-one">
+            240 M <span>THERMOCLINE</span>
+          </div>
+          <div class="depth-label depth-two">SOUNDING: 1,840 M</div>
+          <div class="sub-silhouette">
+            <span class="wake"></span><span class="hull"></span
+            ><span class="conning"></span><span class="fin"></span>
+          </div>
+          <div class="bearing bearing-a">N 47° 18.4′</div>
+          <div class="bearing bearing-b">W 021° 09.7′</div>
+          <div class="signal-tag">
+            <span class="signal-bars"><i></i><i></i><i></i></span> PASSIVE SONAR
+            <b>LISTENING</b>
+          </div>
+          <div class="art-coordinates">HMS VIGILANT <span>·</span> 12.6 NM</div>
+        </div>
+      </section>
+
+      <div class="modal briefing-modal hidden" id="mission-briefing" role="dialog" aria-modal="true" aria-labelledby="briefing-title">
+        <div class="modal-card briefing-card">
+          <p class="eyebrow">TACTICAL DIVE BRIEFING <i></i> CLASSIFIED</p>
+          <p class="briefing-depth" id="briefing-depth"></p>
+          <h2 id="briefing-title">MISSION BRIEFING</h2>
+          <p id="briefing-objective"></p>
+          <div class="intel-block"><span>SENSOR / CAPTAIN’S LOG</span><p id="briefing-intel"></p></div>
+          <div class="briefing-meta" id="briefing-meta"></div>
+          <div class="briefing-actions">
+            <button class="launch-button" id="commence-dive" type="button"><span>COMMENCE DIVE (SPACE)</span><b>↗</b></button>
+            <button class="launch-button secondary" id="return-to-deck" type="button"><span>ABORT TO DECK</span><b>⌂</b></button>
+          </div>
+        </div>
+      </div>
+
+      <section
+        class="play-screen hidden"
+        id="play-screen"
+        aria-label="Submarine mission"
+      >
+        <div class="canvas-wrap">
+          <canvas id="game" aria-label="Top-down submarine game"></canvas>
+          <div class="mission-banner">
+            <span class="live-dot"></span
+            ><span id="mission-status">IN TRANSIT</span><i></i
+            ><span id="mission-time">00:00</span>
+          </div>
+          <div class="vent-status hidden" id="vent-status" aria-live="polite"></div>
+          <div class="tactical-comms hidden" id="tactical-comms"></div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+        <div class="pause-legend hidden" id="pause-legend" role="dialog" aria-label="Acoustic color legend">
+          <strong>MISSION PAUSED · ACOUSTIC LEGEND</strong>
+          <span><i class="legend-rock"></i> ROCK RETURN</span><span><i class="legend-mine"></i> MINE !</span><span><i class="legend-bio"></i> FLESH</span><span><i class="legend-relay"></i> RELAY PYLON</span><span><i class="legend-exit"></i> EXIT BEACON</span>
+          <small>ESC / P TO RESUME · M TO MUTE</small>
+        </div>
+        </div>
+        <aside class="instrument-panel">
+          <div class="panel-heading">
+            <span>VESSEL STATUS</span><b>SSN-742</b>
+          </div>
+          <div class="sub-readout">
+            <div class="sub-icon">◈</div>
+            <div><small>USS HAWKE</small><strong>ATTACK SUBMARINE</strong></div>
+            <span class="status-dot"></span>
+          </div>
+          <div class="meter-block">
+            <div class="meter-label">
+              <span>ACOUSTIC SIGNATURE</span><b id="noise-value">LOW</b>
+            </div>
+            <div class="meter"><i id="noise-meter"></i></div>
+            <small class="meter-hint">Speed and sonar increase exposure</small>
+          </div>
+          <div class="meter-block hull-block">
+            <div class="meter-label">
+              <span>HULL INTEGRITY</span><b id="hull-value">100%</b>
+            </div>
+            <div class="meter hull-meter"><i id="hull-meter"></i></div>
+          </div>
+          <div class="meter-block">
+            <div class="meter-label">
+              <span>BATTERY</span><b id="battery-value">100%</b>
+            </div>
+            <div class="meter"><i id="battery-meter"></i></div>
+          </div>
+          <div class="sonar-charge-readout hidden" id="sonar-charges" aria-live="polite"></div>
+          <div class="mini-chart">
+            <div class="mini-title">
+              <span>TACTICAL PLOT</span><span>RANGE 8 NM</span>
+            </div>
+            <canvas id="radar" aria-label="Tactical radar"></canvas>
+            <div class="radar-legend">
+              <span><i class="you-dot"></i> YOU</span
+              ><span><i class="enemy-dot"></i> HOSTILE</span
+              ><span><i class="goal-dot"></i> EXFIL</span>
+            </div>
+          </div>
+          <div class="objective">
+            <div class="objective-head">
+              <span>MISSION OBJECTIVE</span
+              ><span class="objective-mark">01</span>
+            </div>
+            <strong>REACH THE SAFE ZONE</strong>
+            <p>Cross the channel and evade all hostile sonar sweeps.</p>
+            <div class="progress-track"><i id="progress-bar"></i></div>
+            <small id="progress-label">0% TO EXTRACTION</small>
+          </div>
+          <div class="controls">
+            <div class="controls-head">
+              VESSEL CONTROLS <span>KEYBOARD</span>
+            </div>
+            <div class="key-row">
+              <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd
+              ><span>STEER &amp; THROTTLE</span>
+            </div>
+            <div class="key-row"><kbd>Q</kbd><span>DECOY / MAGNETAR LIGHTNING ROD</span></div>
+            <div class="key-row">
+              <kbd>SPACE</kbd><span>ACTIVE SONAR PING</span>
+            </div>
+            <div class="key-row"><kbd>F</kbd><span>TOGGLE LAMP</span></div>
+            <div class="key-row"><kbd>E</kbd><span>SEVER TETHER / OVERCHARGE NODE</span></div>
+            <div class="key-row">
+              <kbd>ALT</kbd><span>SILENT RUNNING</span><kbd>SHIFT</kbd
+              ><span>BOOST</span>
+            </div>
+          </div>
+          <button id="pause-button" class="pause-button" type="button">
+            Ⅱ <span>PAUSE MISSION</span>
+          </button>
+        </aside>
+        <div class="mobile-controls" aria-label="Touch controls">
+          <button data-control="forward">▲</button
+          ><button data-control="left">◀</button
+          ><button data-control="silent">QUIET</button
+          ><button data-control="right">▶</button
+          ><button data-control="back">▼</button>
+        </div>
+        <div
+          class="modal hidden"
+          id="end-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="end-title"
+        >
+          <div class="modal-card">
+            <p class="eyebrow" id="end-kicker">DIVE TELEMETRY</p>
+            <h2 id="end-title">MISSION COMPLETE</h2>
+            <p id="end-copy">Exit beacon reached.</p>
+            <div id="loss-cause" class="loss-cause"></div>
+            <div class="report-line">
+              <span>TIME</span><b id="end-time">00:00</b>
+            </div>
+            <div class="report-line">
+              <span>PINGS FIRED</span><b id="end-pings">0</b>
+            </div>
+            <div class="report-line">
+              <span>BATTERY USED</span><b id="end-battery">0%</b>
+            </div>
+            <div class="report-line">
+              <span>HULL INTEGRITY</span><b id="end-hull">100%</b>
+            </div>
+            <div class="report-line">
+              <span>DIVE SCORE</span><b id="end-score">0</b>
+            </div>
+            <div class="report-line">
+              <span>STARS EARNED</span><b id="end-stars">☆☆☆</b>
+            </div>
+            <div class="report-line">
+              <span>GHOST SUB</span><b id="end-ghost">—</b>
+            </div>
+            <div class="modal-actions">
+              <button class="launch-button" id="next-depth" type="button">
+                <span>NEXT DEPTH</span><b>↗</b></button
+              ><button class="launch-button secondary" id="retry" type="button">
+                <span>RETRY DIVE</span><b>↻</b></button
+              ><button
+                class="launch-button secondary"
+                id="dive-log"
+                type="button"
+              >
+                <span>DIVE LOG (MENU)</span><b>⌂</b>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>ABYSSAL RECKONING <i>©</i> 2025</span
+        ><span>BUILT FOR THE DEEP <b>///</b> PHASE 01</span>
+      </footer>
+    </main>
+    <script src="audio.js?v=blackout-relays-20261101-7"></script>
+    <script src="world.js?v=blackout-relays-20261101-7"></script>
+    <script src="game.js?v=blackout-relays-20261101-7"></script>
+  </body>
+</html>

@@ -535,7 +535,7 @@ body {
 .pause-legend strong { color: #b8d8be; font-size: 13px; }
 .pause-legend span { display: flex; gap: 10px; align-items: center; }
 .pause-legend i { width: 11px; height: 11px; display: inline-block; border-radius: 50%; }
-.legend-rock { background: #63d6dc; }.legend-mine { background: #f0a65e; }.legend-bio { background: #d69af2; }.legend-exit { background: #72e6c9; }
+.legend-rock { background: #63d6dc; }.legend-mine { background: #f0a65e; }.legend-bio { background: #d69af2; }.legend-relay { background: #75f2dc; box-shadow: 0 0 8px #75f2dc; }.legend-exit { background: #72e6c9; }
 .pause-legend small { margin-top: 10px; color: #78979a; }
 .canvas-wrap canvas {
   display: block;
@@ -559,6 +559,26 @@ body {
   letter-spacing: 0.13em;
   color: #a8c1b9;
 }
+.vent-status {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 17px;
+  padding: 10px 12px;
+  border: 1px solid #d9854666;
+  background: #21170fd9;
+  color: #e5b56e;
+  font: 9px "DM Mono", monospace;
+  letter-spacing: .11em;
+  text-shadow: 0 0 10px #ff9d4c55;
+}
+.vent-status.active {
+  border-color: #ff9e4a;
+  color: #ffd18c;
+  box-shadow: 0 0 18px #f58a3755, inset 0 0 13px #ff9b351f;
+  animation: vent-pulse .55s ease-in-out infinite alternate;
+}
+@keyframes vent-pulse { to { filter: brightness(1.35); } }
 .tactical-comms {
   position: absolute;
   z-index: 2;
@@ -702,6 +722,18 @@ body {
   padding: 15px 0 12px;
   border-bottom: 1px solid var(--line);
 }
+.sonar-charge-readout {
+  margin: -2px 0 12px;
+  padding: 9px 10px;
+  color: #b8ecaa;
+  border: 1px solid #80bf8c55;
+  background: #10271c;
+  font: 700 9px "DM Mono", monospace;
+  letter-spacing: .12em;
+  text-align: center;
+  text-shadow: 0 0 10px #7fff7655;
+}
+.sonar-charge-readout.hidden { display: none; }
 .mini-title {
   font-size: 8px;
 }

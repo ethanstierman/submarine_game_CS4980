@@ -17,83 +17,119 @@
       id: "depth-100",
       depth: 100,
       title: "ECHO CALIBRATION",
-      subtitle: "Acoustic Navigation & Currents",
+      subtitle: "Grand Chambers · Acoustic Calibration",
       seed: 100173,
       bounds: [70, 50],
       parTime: 115,
       enemies: { listener: 0, lurker: 0, magnetar: 0 },
       mines: 12,
-      currents: 2,
-      strongCurrents: 0,
-      batteries: 4,
+      topology: "GRAND_CHAMBERS",
+      batteries: 3,
       banner:
-        "OPTICS OFFLINE. PING [SPACE] TO DETECT WALLS & MINES. USE LAMP [F] SPARINGLY TO THREAD MINEFIELDS.",
+        "CALIBRATION SECTOR. ACOUSTIC RETURNS AVAILABLE. LAMP [F] ONLINE; MONITOR BATTERY WHILE CHARTING THE MINEFIELD.",
       wide: true,
     },
     {
       id: "depth-200",
       depth: 200,
-      title: "BLIND LISTENER",
-      subtitle: "Introducing Sound Predators",
+      title: "GLASS HULL",
+      subtitle: "Labyrinth Grid · Limited Acoustic Navigation",
       seed: 200287,
       bounds: [82, 58],
       parTime: 145,
-      enemies: { listener: 3, lurker: 0, magnetar: 0 },
-      mines: 14,
-      currents: 0,
-      strongCurrents: 0,
+      enemies: { listener: 0, lurker: 0, magnetar: 0 },
+      mines: 16,
+      topology: "LABYRINTH_GRID",
+      levelRules: { maxHull: 1, lampDisabled: true, maxPings: 14, pingPickup: 5, phosphorDuration: 3.2 },
       batteries: 3,
       banner:
-        "LISTENER DETECTED. PING TO BAIT ITS STRAIGHT-LINE LUNGE INTO WALLS OR MINES, OR HUG ROCK WALLS SILENTLY TO MASK YOUR HULL.",
+        "GLASS HULL PROTOCOL. ACOUSTIC CHARGES LIMITED. OPTICS ARE OFFLINE; PRESSURE TOLERANCE IS CRITICAL.",
     },
     {
       id: "depth-300",
       depth: 300,
-      title: "PHOTOTAXIS",
-      subtitle: "Light Predators & Minefields",
+      title: "THERMAL CANYON",
+      subtitle: "U-Turn Canyon · Hydrothermal Vent Pulses",
       seed: 300391,
       bounds: [88, 62],
       parTime: 170,
-      enemies: { listener: 0, lurker: 3, magnetar: 0 },
-      mines: 16,
-      currents: 0,
-      strongCurrents: 0,
+      enemies: { listener: 1, lurker: 0, magnetar: 0 },
+      mines: 14,
+      vents: 5,
+      topology: "U_TURN_CANYON",
       batteries: 4,
+      briefingIntel: "Hydrophone arrays detect a single blind leviathan guarding the southern fault line. Seismic logs indicate cyclic volcanic vent eruptions every 6.5 seconds, with a 1-second warning hiss, a 3.5-second sub-bass roar, and a 1-second acoustic reverb buffer.",
       banner:
-        "SHADE STALKERS CREEP IN THE DARK. SHINE YOUR LAMP [F] DIRECTLY ON THEM TO PIN AND REPEL THEM.",
+        "THERMAL CANYON. ACOUSTIC MASKING CYCLES REPEAT EVERY 6.5 SECONDS: 1-SECOND WARNING, 3.5-SECOND ERUPTION, AND 1-SECOND REVERB BUFFER.",
     },
     {
       id: "depth-400",
       depth: 400,
-      title: "ELECTRO-SILENCE",
-      subtitle: "Electro-Reception & Combined Threats",
+      title: "SPIRAL STALKERS",
+      subtitle: "Spiral Abyss · Lamp Discipline",
       seed: 400489,
       bounds: [94, 66],
       parTime: 205,
-      enemies: { listener: 1, lurker: 1, magnetar: 1 },
-      mines: 18,
-      currents: 0,
-      strongCurrents: 4,
-      batteries: 3,
+      enemies: { listener: 0, lurker: 3, magnetar: 0 },
+      mines: 20,
+      topology: "SPIRAL_ABYSS",
+      batteries: 4,
+      briefingIntel: "Abyssal trench immersion requires absolute optical discipline. Thermal imaging confirms three Shade Stalkers nesting along the spiral rooms. They stalk motion in zero-lux zones and recoil from high-intensity photon emission.",
       banner:
-        "MAGNETAR DETECTED. ITS EMP FIELD GLITCHES YOUR HUD. IT IS DEAF TO ENGINES BUT HUNTS SONAR PINGS & LAMP LIGHT — CUT ELECTRONICS AND FLY ON THRUSTERS OR LURE IT WITH A DECOY [Q].",
+        "SPIRAL STALKERS. THREE PREDATORS ARE ACTIVE ALONG THE OUTER ROOMS AND INNER CORE. WATCH BATTERY AND MINE RETURNS.",
     },
     {
       id: "depth-500",
       depth: 500,
-      title: "DEAD RECKONING",
-      subtitle: "Multiple Electromagnetic Predators",
+      title: "BLACKOUT RELAYS",
+      subtitle: "Descent Shaft · Floodlight Pylon Network",
       seed: 500593,
       bounds: [100, 70],
       parTime: 245,
-      enemies: { listener: 2, lurker: 1, magnetar: 2 },
-      mines: 22,
-      currents: 0,
-      strongCurrents: 5,
-      batteries: 4,
+      enemies: { listener: 0, lurker: 3, magnetar: 0 },
+      mines: 16,
+      pylonCount: 10,
+      topology: "DESCENT_SHAFT",
+      levelRules: { lampDisabled: true, maxPings: 6, pingPickup: 4, relayFirstDuration: 8, relayDuration: 6, relayPingBonus: 3 },
+      batteries: 3,
+      briefingIntel: "Ten Floodlight Pylons form a relay chain through the descent shaft. Resonating each new pylon restores three sonar charges; the first three side-alcove canisters hold four charges each. Three Shade Stalkers recoil from the active domes, then rush back when the light begins to fail.",
       banner:
-        "MAGNETAR DETECTED. ITS EMP FIELD GLITCHES YOUR HUD. IT IS DEAF TO ENGINES BUT HUNTS SONAR PINGS & LAMP LIGHT — CUT ELECTRONICS AND FLY ON THRUSTERS OR LURE IT WITH A DECOY [Q].",
-      tight: true,
+        "BLACKOUT RELAYS. SIX SONAR CHARGES. RESONATE THE FLOODLIGHT PYLONS TO RECHARGE AND HOLD BACK THE STALKERS.",
+    },
+    {
+      id: "depth-600",
+      depth: 600,
+      title: "FARADAY TRENCH",
+      subtitle: "Magnetar Field · Electromagnetic Stealth",
+      seed: 600701,
+      bounds: [100, 70],
+      parTime: 235,
+      enemies: { listener: 0, lurker: 0, magnetar: 2 },
+      mines: 18,
+      topology: "U_TURN_CANYON",
+      batteries: 4,
+      levelRules: { startingDecoys: 3 },
+      briefingIntel: "Deep-trench magnetometers detect two massive bio-electric medusae occupying the Faraday Trench. Their electromagnetic auras scramble navigation telemetry and violently attract them toward active sonar pulses or lamp emissions. However, subjects lack acoustic organs and are completely deaf to mechanical propeller thrust.",
+      banner:
+        "FARADAY TRENCH. SCOUT OUTSIDE THE STATIC RING, CUT SONAR AND LAMP, THEN CROSS ON MECHANICAL THRUST.",
+    },
+    {
+      id: "depth-700",
+      depth: 700,
+      title: "ABYSSAL RECKONING",
+      subtitle: "Finale · Multi-Sector Spiral Abyss",
+      seed: 700811,
+      bounds: [100, 70],
+      parTime: 290,
+      enemies: { listener: 1, lurker: 2, magnetar: 1 },
+      mines: 22,
+      vents: 4,
+      pylonCount: 4,
+      topology: "SPIRAL_ABYSS",
+      batteries: 4,
+      briefingIntel: "Three sectors converge on the inner core: hydrophone traces mark one Listener on the approach, two Shade Stalkers in the middle rooms, and one Magnetar around the final basin. Four hydrothermal vents and four Floodlight Pylons complicate the route. The electromagnetic signature can scramble all active instruments.",
+      banner:
+        "ABYSSAL RECKONING. CROSS THE LISTENER'S APPROACH AND STALKER ROOMS, THEN SCOUT THE MAGNETAR BASIN BEFORE CUTTING SONAR AND LAMP.",
     },
   ];
   const DAILY = {
@@ -104,13 +140,14 @@
     seed: 0,
     bounds: [100, 70],
     parTime: 220,
-    enemies: { listener: 2, lurker: 1, magnetar: 2 },
-    mines: 22,
-    currents: 4,
-    strongCurrents: 0,
+    enemies: { listener: 1, lurker: 1, magnetar: 1 },
+    mines: 18,
+    vents: 3,
+    pylonCount: 5,
+    topology: "SPIRAL_ABYSS",
     batteries: 4,
     banner:
-      "MAGNETAR DETECTED. ITS EMP FIELD GLITCHES YOUR HUD. IT IS DEAF TO ENGINES BUT HUNTS SONAR PINGS & LAMP LIGHT — CUT ELECTRONICS AND FLY ON THRUSTERS OR LURE IT WITH A DECOY [Q].",
+      "DAILY TRENCH. A LISTENER, SHADE STALKER, AND MAGNETAR occupy separate sectors. Resonate Floodlight Pylons and time your crossing with the volcanic vent cycle.",
   };
   function dailySeed(date = new Date().toISOString().slice(0, 10)) {
     let h = 2166136261;
@@ -137,7 +174,8 @@
       lurkerCount: level.enemies?.lurker ?? 0,
       magnetarCount: level.enemies?.magnetar ?? 0,
       mineCount: level.mines ?? 0,
-      currentCount: (level.currents ?? 0) + (level.strongCurrents ?? 0),
+      ventCount: level.vents ?? 0,
+      pylonCount: level.pylonCount ?? 0,
       ...config,
     };
     return {
@@ -148,7 +186,9 @@
         magnetar: counts.magnetarCount,
       },
       mines: counts.mineCount,
-      configuredCurrentCount: counts.currentCount,
+      vents: counts.ventCount,
+      pylonCount: counts.pylonCount,
+      levelRules: { ...(level.levelRules || {}), ...(config.levelRules || {}) },
     };
   }
   class World {
@@ -164,25 +204,36 @@
       this.rows = 70;
       this.width = this.cols * this.tileSize;
       this.height = this.rows * this.tileSize;
+      const topologyCoords = {
+        DESCENT_SHAFT: [[50, 9], [28, 17], [70, 25], [30, 34], [72, 43], [45, 52], [22, 61]],
+        SPIRAL_ABYSS: [[10, 60], [10, 42], [11, 25], [12, 10], [35, 10], [60, 11], [88, 12], [88, 32], [86, 58], [72, 53], [61, 45], [50, 36]],
+        U_TURN_CANYON: [[14, 14], [36, 12], [61, 14], [84, 20], [87, 35], [82, 47], [65, 53], [43, 56], [14, 57]],
+        LABYRINTH_GRID: [[14, 58], [14, 46], [27, 46], [27, 34], [19, 34], [19, 22], [34, 22], [34, 13], [49, 13], [49, 27], [62, 27], [62, 17], [75, 17], [75, 31], [85, 31], [85, 14]],
+        GRAND_CHAMBERS: [[50, 9], [22, 15], [25, 29], [53, 27], [77, 32], [68, 46], [45, 51], [22, 61]],
+      };
+      this.topology = level.topology || "GRAND_CHAMBERS";
+      const route = topologyCoords[this.topology] || topologyCoords.GRAND_CHAMBERS;
+      this.spawnPoint = { x: route[0][0] * this.tileSize, y: route[0][1] * this.tileSize };
+      this.goal = { x: route[route.length - 1][0] * this.tileSize, y: route[route.length - 1][1] * this.tileSize };
       this.player = {
-        x: 12.5 * this.tileSize,
-        y: 14.5 * this.tileSize,
-        estX: 12.5 * this.tileSize,
-        estY: 14.5 * this.tileSize,
+        x: this.spawnPoint.x,
+        y: this.spawnPoint.y,
+        estX: this.spawnPoint.x,
+        estY: this.spawnPoint.y,
         angle: -0.62,
         speed: 0,
         noise: 0,
-        hull: 100,
-        battery: 100,
-        decoys: 2,
+        hull: this.level.levelRules.maxHull ?? 100,
+        battery: this.level.levelRules.lampDisabled ? 0 : 100,
+        decoys: this.level.levelRules.startingDecoys || 2,
         lamp: false,
         leaking: false,
         tether: true,
         detected: false,
         pings: 0,
+        sonarCharges: Number.isFinite(this.level.levelRules.maxPings) ? this.level.levelRules.maxPings : Infinity,
         empDisabledTimer: 0,
       };
-      this.goal = { x: 86.5 * this.tileSize, y: 56.5 * this.tileSize };
       this.enemies = [];
       this.generateCavern(rng);
       const spawnX = this.player.x, spawnY = this.player.y;
@@ -206,7 +257,15 @@
             ? homeCandidates.filter((candidate) => distance(candidate, this.goal) > 300 && distance(candidate, this.goal) < 1900)
             : homeCandidates;
           const placementCandidates = magnetarCandidates.length ? magnetarCandidates : homeCandidates;
-          const node = placementCandidates
+          const spiralIndex = Math.floor((i + 1) * (this.spine.length - 1) / (count + 1));
+          const specialNode = level.id === "depth-700" && type === "listener" ? this.spine[2]
+            : level.id === "depth-700" && type === "lurker" ? this.spine[5 + i * 2]
+            : level.id === "depth-700" && type === "magnetar" ? this.spine[this.spine.length - 2]
+            : level.id === "depth-600" && type === "magnetar" ? this.spine[Math.min(this.spine.length - 2, 4 + i * 2)]
+            : type === "listener" && level.topology === "U_TURN_CANYON" ? this.spine[4]
+            : type === "lurker" && level.topology === "SPIRAL_ABYSS" ? this.spine[spiralIndex]
+            : null;
+          const node = specialNode || placementCandidates
             .map((candidate) => ({ candidate, nearest: claimedHomes.length ? Math.min(...claimedHomes.map((home) => distance(candidate, home))) : Infinity }))
             .filter((entry) => entry.nearest >= 650)
             .sort((a, b) => type === "magnetar" && level.depth === 400
@@ -217,7 +276,9 @@
           claimedHomes.push(node);
           const x = node.x, y = node.y;
           const nodeIndex = this.spine.reduce((best, point, index) => distance(point, node) < distance(this.spine[best] || node, node) ? index : best, 0);
-          const patrolNode = this.spine[Math.min(this.spine.length - 1, nodeIndex + 2)] || node;
+          const patrolNode = type === "listener" && level.topology === "U_TURN_CANYON"
+            ? this.spine[5]
+            : this.spine[Math.min(this.spine.length - 1, nodeIndex + 2)] || node;
           this.enemies.push({
             type, x, y, homeX: x, homeY: y, homeNode: { x, y }, leashRadius: 520,
             angle: rng() * 6.28, phase: rng() * 6.28,
@@ -236,27 +297,46 @@
         }
       });
       this.mines = [];
-      this.currents = [];
       this.batteries = [];
       for (let i = 0; i < this.level.mines; i++) {
         const site = this.hazardSites[i % this.hazardSites.length] || this.spine[i + 1];
         const side = i % 2 ? 1 : -1;
         this.mines.push({ x: site.x + side * 52, y: site.y + (i % 3 - 1) * 26, r: 13, triggerRadius: 32, armed: true });
       }
-      const currentCount = this.level.configuredCurrentCount;
-      for (let i = 0; i < currentCount; i++) {
-        const path = this.tunnelSegments[i % this.tunnelSegments.length];
-        const point = path[Math.floor(path.length * 0.55)];
-        this.currents.push({ x: point.x, y: point.y, r: 90, angle: path.angle, force: i < level.strongCurrents ? 40 : 16 });
-      }
       for (let i = 0; i < level.batteries; i++) {
         const site = this.salvageSites[i % this.salvageSites.length] || this.spine[1];
-        this.batteries.push({ x: site.x, y: site.y, taken: false });
+        this.batteries.push({ x: site.x, y: site.y, taken: false, sonarCharge: !!this.level.levelRules.pingPickup });
+      }
+      this.vents = [];
+      const choke = this.topology === "U_TURN_CANYON" ? this.spine[4] : null;
+      const ventOffsets = [[-70, 0], [0, -48], [70, 0]];
+      for (let i = 0; i < this.level.vents; i++) {
+        const site = choke
+          ? { x: choke.x + ventOffsets[i % ventOffsets.length][0], y: choke.y + ventOffsets[i % ventOffsets.length][1] }
+          : this.spine[Math.min(this.spine.length - 2, i + 1)];
+        if (site) this.vents.push({ x: site.x, y: site.y, radius: 36, phase: rng() * Math.PI * 2 });
+      }
+      const routePoints = this.tunnelSegments.flat();
+      const routeLengths = [0];
+      for (let i = 1; i < routePoints.length; i++) routeLengths[i] = routeLengths[i - 1] + distance(routePoints[i - 1], routePoints[i]);
+      const totalRouteLength = routeLengths[routeLengths.length - 1] || 0;
+      this.pylons = [];
+      for (let i = 0; i < this.level.pylonCount; i++) {
+        const wanted = totalRouteLength * (i + 1) / (this.level.pylonCount + 1);
+        let index = routeLengths.findIndex((length) => length >= wanted);
+        if (index < 1) index = 1;
+        const a = routePoints[index - 1], b = routePoints[index];
+        const span = routeLengths[index] - routeLengths[index - 1] || 1;
+        const t = (wanted - routeLengths[index - 1]) / span;
+        this.pylons.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, activeTimer: 0, maxRadius: 260, wasCharged: false });
       }
       this.decoys = [];
       this.pings = [];
       this.pingCooldown = 0;
       this.elapsed = 0;
+      this.rumblePhase = this.vents.length ? "WARNING" : "CALM";
+      this.rumbleActive = false;
+      this.isSoundMasked = false;
       this.empIntensity = 0;
       this.empBearing = 0;
       this.nearestMagnetar = null;
@@ -311,47 +391,63 @@
         route.angle = Math.atan2(b.y - a.y, b.x - a.x);
         return route;
       };
-      const start = { x: 12.5 * t, y: 14.5 * t }, goal = { x: 86.5 * t, y: 56.5 * t };
-      const count = 6 + Math.floor(rng() * 2);
-      this.spine = Array.from({ length: count }, (_, i) => {
-        const f = i / (count - 1), lateral = i && i < count - 1 ? (rng() - 0.5) * 12 : 0;
-        const dx = goal.x - start.x, dy = goal.y - start.y, len = Math.hypot(dx, dy);
-        return { x: clamp(start.x + dx * f - dy / len * lateral, (border + 3) * t, (cols - border - 3) * t),
-          y: clamp(start.y + dy * f + dx / len * lateral, (border + 3) * t, (rows - border - 3) * t),
-          type: i % 2 === 0 ? "junction" : "waypoint" };
-      });
+      const routeTiles = {
+        DESCENT_SHAFT: [[50,9],[28,17],[70,25],[30,34],[72,43],[45,52],[22,61]],
+        SPIRAL_ABYSS: [[10,60],[10,42],[11,25],[12,10],[35,10],[60,11],[88,12],[88,32],[86,58],[72,53],[61,45],[50,36]],
+        U_TURN_CANYON: [[14,14],[36,12],[61,14],[84,20],[87,35],[82,47],[65,53],[43,56],[14,57]],
+        LABYRINTH_GRID: [[14,58],[14,46],[27,46],[27,34],[19,34],[19,22],[34,22],[34,13],[49,13],[49,27],[62,27],[62,17],[75,17],[75,31],[85,31],[85,14]],
+        GRAND_CHAMBERS: [[50,9],[22,15],[25,29],[53,27],[77,32],[68,46],[45,51],[22,61]],
+      };
+      const route = (routeTiles[this.topology] || routeTiles.GRAND_CHAMBERS)
+        .map(([x,y]) => ({ x: x * t, y: y * t, type: "junction" }));
+      const start = route[0], goal = route[route.length - 1];
+      this.spawnPoint = { ...start };
+      this.goal = { ...goal };
+      this.spine = route.map((point, i) => ({ ...point, type: i % 2 ? "waypoint" : "junction" }));
       this.spine[0] = { ...start, type: "junction" };
-      this.spine[count - 1] = { ...goal, type: "junction" };
+      this.spine[this.spine.length - 1] = { ...goal, type: "junction" };
       this.junctions = this.spine.filter((n) => n.type === "junction");
       this.tunnelSegments = [];
-      this.spine.forEach((node) => carve(node.x, node.y, (5.5 + rng() * 2) * t));
-      for (let i = 0; i < count - 1; i++) {
+      this.pillars = [];
+      const labyrinth = this.topology === "LABYRINTH_GRID";
+      const grand = this.topology === "GRAND_CHAMBERS";
+      this.spine.forEach((node, i) => {
+        const radius = grand ? (i % 2 ? 2.1 : 8.5) * t : labyrinth ? 2.4 * t : (i % 3 === 0 ? 6.5 : 4.2) * t;
+        carve(node.x, node.y, radius);
+        if (grand && i % 2 === 0 && i > 0 && i < this.spine.length - 1) {
+          const pillar = { x: node.x, y: node.y, r: 3.1 * t };
+          this.pillars.push(pillar);
+          // Preserve a broad ring around each central island.
+          carve(node.x, node.y, 8.5 * t);
+        }
+      });
+      for (let i = 0; i < this.spine.length - 1; i++) {
         const a = this.spine[i], b = this.spine[i + 1], dx = b.x - a.x, dy = b.y - a.y;
         const len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
-        const bend = (rng() - 0.5) * Math.min(9 * t, len * 0.25);
+        const bend = labyrinth ? 0 : (rng() - 0.5) * Math.min(9 * t, len * 0.25);
         const control = { x: (a.x + b.x) / 2 + nx * bend, y: (a.y + b.y) / 2 + ny * bend };
-        this.tunnelSegments.push(carveBezier(a, control, b, (3.5 + rng() * 0.7) * t));
+        const radius = grand ? (i % 2 ? 2.1 : 3.2) * t : labyrinth ? 2.4 * t : (i % 3 === 1 ? 2.1 : 3.5) * t;
+        this.tunnelSegments.push(carveBezier(a, control, b, radius));
       }
       this.branches = [];
       const branchNodes = this.spine.slice(1, -1);
-      const branchCount = Math.min(branchNodes.length, 3 + Math.floor(rng() * 2));
+      const branchCount = labyrinth ? Math.min(10, branchNodes.length) : Math.min(branchNodes.length, 3 + Math.floor(rng() * 2));
       for (let i = 0; i < branchCount; i++) {
         const node = branchNodes[Math.floor(i * branchNodes.length / branchCount)];
         const ix = this.spine.indexOf(node), previous = this.spine[ix - 1], next = this.spine[ix + 1];
         const spineAngle = Math.atan2(next.y - previous.y, next.x - previous.x);
         const side = i % 2 ? -1 : 1;
-        const angle = spineAngle + side * (1.25 + rng() * 0.45);
-        const length = (14 + rng() * 8) * t;
+        const angle = labyrinth ? spineAngle + side * Math.PI / 2 : spineAngle + side * (1.25 + rng() * 0.45);
+        const length = (labyrinth ? 5 + rng() * 6 : 14 + rng() * 8) * t;
         const endpoint = { x: clamp(node.x + Math.cos(angle) * length, (border + 6) * t, (cols - border - 6) * t),
           y: clamp(node.y + Math.sin(angle) * length, (border + 6) * t, (rows - border - 6) * t) };
-        const bend = (rng() - 0.5) * 5 * t;
+        const bend = labyrinth ? 0 : (rng() - 0.5) * 5 * t;
         const control = { x: (node.x + endpoint.x) / 2 - Math.sin(angle) * bend,
           y: (node.y + endpoint.y) / 2 + Math.cos(angle) * bend };
-        carveBezier(node, control, endpoint, 3.2 * t);
-        carve(endpoint.x, endpoint.y, 4.5 * t);
-        this.branches.push({ endpoint, kind: "salvage" });
+        carveBezier(node, control, endpoint, labyrinth ? 2.4 * t : 3.2 * t);
+        if (!labyrinth) carve(endpoint.x, endpoint.y, 4.5 * t);
+        this.branches.push({ endpoint, kind: labyrinth && i % 3 === 0 ? "dead-end" : "salvage" });
       }
-      this.pillars = [];
       this.salvageSites = this.branches.filter((branch) => branch.kind === "salvage").map((branch) => branch.endpoint);
       this.hazardSites = [...this.spine.slice(1, -1), ...this.branches.map((branch) => branch.endpoint)];
 
@@ -400,7 +496,7 @@
         }
         return seen;
       };
-      const sx = 12, sy = 14, gx = 86, gy = 56;
+      const sx = Math.floor(start.x / t), sy = Math.floor(start.y / t), gx = Math.floor(goal.x / t), gy = Math.floor(goal.y / t);
       let reachable = flood(sx, sy);
       if (!reachable[gy][gx]) {
         const queue = [[sx, sy]], parent = Array.from({ length: rows }, () => Array(cols).fill(null));
@@ -418,7 +514,34 @@
       reachable = flood(sx, sy);
       for (let y = border; y < rows - border; y++) for (let x = border; x < cols - border; x++)
         if (!grid[y][x] && !reachable[y][x]) grid[y][x] = 1;
+      this.pillars.forEach((pillar) => {
+        const r = pillar.r / t;
+        for (let y = Math.floor(pillar.y / t - r); y <= Math.ceil(pillar.y / t + r); y++)
+          for (let x = Math.floor(pillar.x / t - r); x <= Math.ceil(pillar.x / t + r); x++)
+            if (inside(x,y) && Math.hypot(x + .5 - pillar.x / t, y + .5 - pillar.y / t) <= r) grid[y][x] = 1;
+      });
       this.cavern = grid;
+      const startTile = [Math.floor(start.x / t), Math.floor(start.y / t)];
+      const goalTile = [Math.floor(goal.x / t), Math.floor(goal.y / t)];
+      const pathQueue = [[startTile[0], startTile[1], 0]];
+      const pathSeen = Array.from({ length: rows }, () => new Uint8Array(cols));
+      pathSeen[startTile[1]][startTile[0]] = 1;
+      let pathSteps = -1;
+      for (let i = 0; i < pathQueue.length; i++) {
+        const [x, y, steps] = pathQueue[i];
+        if (x === goalTile[0] && y === goalTile[1]) { pathSteps = steps; break; }
+        for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const xx = x + ox, yy = y + oy;
+          if (inside(xx, yy) && !grid[yy][xx] && !pathSeen[yy][xx]) {
+            pathSeen[yy][xx] = 1; pathQueue.push([xx, yy, steps + 1]);
+          }
+        }
+      }
+      this.spawnExitPathLength = pathSteps * t;
+      this.spawnExitDistance = distance(start, goal);
+      if (this.spawnExitDistance < 1200 || this.spawnExitPathLength < 2600) {
+        throw new Error(`Mission route too short for ${this.level.id}: ${Math.round(this.spawnExitDistance)}px direct, ${Math.round(this.spawnExitPathLength)}px path`);
+      }
       this.rocks = [];
       for (let y = border; y < rows - border; y++) for (let x = border; x < cols - border; x++)
         if (grid[y][x] && (!grid[y - 1][x] || !grid[y + 1][x] || !grid[y][x - 1] || !grid[y][x + 1]))
@@ -430,6 +553,7 @@
         ...this.mines.filter((o) => o.armed).map((o, i) => ({ ...o, r: 14, kind: "MINE", key: `m${i}` })),
         ...this.enemies.map((o, i) => ({ ...o, r: 20, kind: "FLESH", subtype: o.type, key: `e${i}` })),
         ...this.batteries.filter((o) => !o.taken).map((o, i) => ({ ...o, r: 11, kind: "BATTERY", key: `b${i}` })),
+        ...this.pylons.map((o, i) => ({ ...o, r: 13, kind: "PYLON", key: `r${i}` })),
         { ...this.goal, r: 15, kind: "BEACON", key: "exit" },
       ];
       const hits = [];
@@ -557,7 +681,12 @@
       if (![originX, originY].every(Number.isFinite)) return null;
       if (isPlayer && this.player.empDisabledTimer > 0) return null;
       if (isPlayer && this.pingCooldown > 0) return null;
-      if (isPlayer) this.pingCooldown = 0.75;
+      if (isPlayer && this.player.sonarCharges <= 0) return null;
+      if (isPlayer) {
+        this.pingCooldown = 0.75;
+        this.player.pings++;
+        if (Number.isFinite(this.player.sonarCharges)) this.player.sonarCharges--;
+      }
       this.alertMagnetars(isPlayer ? "sonar" : "decoy", originX, originY, isPlayer ? 420 : 580);
       const rays = this.castSonarRays(originX, originY, 520);
       const sectors = new Map();
@@ -567,18 +696,37 @@
         if (!prior || hit.dist < prior.dist) sectors.set(sector, { ...hit, sector });
       });
       const sectorHits = [...sectors.values()].sort((a, b) => a.sector - b.sector);
-      const colors = { STONE: "#00f0ff", MINE: "#ffaa00", FLESH: "#ff2a55", BEACON: "#00ff88", BATTERY: "#00ff88" };
+      const relayHits = [...new Map(rays.filter((hit) => hit.kind === "PYLON" && hit.dist <= 380).map((hit) => [hit.key, hit])).values()];
+      relayHits.forEach((hit) => {
+        const pylon = this.pylons[Number(hit.key.slice(1))];
+        if (pylon) {
+          const firstCharge = !pylon.wasCharged;
+          pylon.activeTimer = firstCharge
+            ? (this.level.levelRules.relayFirstDuration || 8)
+            : (this.level.levelRules.relayDuration || 6);
+          if (firstCharge) {
+            pylon.wasCharged = true;
+            if (Number.isFinite(this.player.sonarCharges)) {
+              this.player.sonarCharges = Math.min(this.level.levelRules.maxPings, this.player.sonarCharges + (this.level.levelRules.relayPingBonus || 3));
+            }
+          }
+          this.events.push({ type: "pylon-activated", x: pylon.x, y: pylon.y, firstCharge });
+        }
+      });
+      const pingHits = [...sectorHits, ...relayHits.filter((hit) => !sectorHits.some((sectorHit) => sectorHit.key === hit.key))];
+      const colors = { STONE: "#00f0ff", MINE: "#ffaa00", FLESH: "#ff2a55", BEACON: "#00ff88", BATTERY: "#00ff88", PYLON: "#75f2dc" };
       const ping = {
         x: originX, y: originY, r: 0, age: 0, decoy: !isPlayer,
-        hits: sectorHits.map((hit) => {
-          const dots = [{ x: hit.x, y: hit.y, color: colors[hit.kind] || colors.STONE, radius: 2, alpha: 0, age: 0, active: false }];
+        hits: pingHits.map((hit) => {
+          const color = hit.subtype === "lurker" ? "#bd83f0" : hit.subtype === "magnetar" ? "#d97cff" : colors[hit.kind] || colors.STONE;
+          const dots = [{ x: hit.x, y: hit.y, color, radius: 2, alpha: 0, age: 0, active: false }];
           return { ...hit, dots, activated: false };
         }),
         contours: rays.filter((hit) => hit.kind === "STONE" && hit.dist <= 480).map((hit) => ({
           ...hit, activated: false, dot: { x: hit.x, y: hit.y, color: colors.STONE, radius: 2, alpha: 0, age: 0, active: false },
         })),
       };
-      ping.audioHits = [...sectorHits].sort((a, b) => a.dist - b.dist).slice(0, 5).map((hit) => ({
+      ping.audioHits = [...pingHits].sort((a, b) => a.dist - b.dist).slice(0, 5).map((hit) => ({
         delay: hit.dist / 450,
         pan: clamp((hit.x - this.player.x) / 520, -1, 1),
         distNorm: clamp(hit.dist / 520, 0, 1), kind: hit.kind,
@@ -586,7 +734,6 @@
       this.pings.push(ping);
       if (isPlayer) {
         this.player.isMasked = false;
-        this.player.pings++;
         this.noiseEvents.push({ id: this.noiseSequence++, type: "ping", x: originX, y: originY, age: 0, radius: 460, loudness: 110, priority: 80 });
       } else {
         this.noiseEvents.push({ id: this.noiseSequence++, type: "DECOY", x: originX, y: originY, age: 0, radius: 700, loudness: 140, priority: 100 });
@@ -597,6 +744,19 @@
     update(dt, input) {
       if (this.over || this.paused) return;
       this.elapsed += dt;
+      const cyclePhase = this.elapsed % 6.5;
+      const rumblePhase = !this.vents.length ? "CALM"
+        : cyclePhase < 1 ? "WARNING"
+        : cyclePhase < 4.5 ? "ACTIVE"
+        : cyclePhase < 5.5 ? "REVERB" : "CALM";
+      if (rumblePhase !== this.rumblePhase) {
+        const events = { WARNING: "vent-warning", ACTIVE: "vent-rumble-start", REVERB: "vent-rumble-end", CALM: "vent-mask-end" };
+        if (events[rumblePhase]) this.events.push({ type: events[rumblePhase] });
+      }
+      this.rumblePhase = rumblePhase;
+      this.rumbleActive = rumblePhase === "ACTIVE";
+      this.isSoundMasked = rumblePhase === "ACTIVE" || rumblePhase === "REVERB";
+      this.pylons.forEach((pylon) => { pylon.activeTimer = Math.max(0, pylon.activeTimer - dt); });
       this.pingCooldown = Math.max(0, this.pingCooldown - dt);
       if (this.elapsed - this.breadcrumbAt >= 0.16) {
         this.breadcrumbAt = this.elapsed;
@@ -635,10 +795,8 @@
       if (input.silent) p.speed = Math.min(p.speed, 42);
       p.x = clamp(p.x + Math.cos(p.angle) * p.speed * dt, 25, this.width - 25);
       p.y = clamp(p.y + Math.sin(p.angle) * p.speed * dt, 25, this.height - 25);
-      // The inertial plotter integrates commanded movement only. Currents and
-      // collision impulses affect the physical hull below, so the estimate drifts.
-      p.estX = clamp(p.estX + Math.cos(p.angle) * p.speed * dt + (Math.random() - .5) * .55 * dt, 25, this.width - 25);
-      p.estY = clamp(p.estY + Math.sin(p.angle) * p.speed * dt + (Math.random() - .5) * .55 * dt, 25, this.height - 25);
+      p.estX = clamp(p.estX + Math.cos(p.angle) * p.speed * dt, 25, this.width - 25);
+      p.estY = clamp(p.estY + Math.sin(p.angle) * p.speed * dt, 25, this.height - 25);
       p.battery = Math.max(0, p.battery - dt * (0.055 + (p.lamp ? 5.2 : 0) + (p.tether ? 0.025 : 0)));
       if (p.lamp) p.lampSessionSeconds += dt;
       if (p.battery === 0) p.lamp = false;
@@ -664,7 +822,7 @@
       }
       if (Math.abs(thrust) > 0.65 && this.elapsed - (this.thrusterNoiseAt ?? -1) >= 0.8) {
         this.thrusterNoiseAt = this.elapsed;
-        this.noiseEvents.push({ id: this.noiseSequence++, type: "ENGINE", x: p.x, y: p.y, age: 0, radius: 160, throttle: Math.abs(thrust), loudness: 45 + Math.abs(thrust) * 60, priority: 30 });
+        this.noiseEvents.push({ id: this.noiseSequence++, type: "ENGINE", x: p.x, y: p.y, age: 0, radius: 115, throttle: Math.abs(thrust), speedRatio: p.speed / max, loudness: 45 + Math.abs(thrust) * 60, priority: 30 });
       }
       if (p.leaking && this.elapsed - (this.leakNoiseAt || -2.5) >= 2.5) {
         this.leakNoiseAt = this.elapsed;
@@ -696,12 +854,14 @@
       this.echoes = this.echoes.filter((e) => (e.age += dt) < 2.8);
       this.phosphor = this.phosphor.filter((d) => {
         if (!d.active) return true;
-        d.age += dt; d.alpha = Math.max(0, 1 - d.age / 2.4);
-        return d.age < 2.4;
+        const duration = this.level.levelRules.phosphorDuration || 2.4;
+        d.age += dt; d.alpha = Math.max(0, 1 - d.age / duration);
+        return d.age < duration;
       });
       this.pings = this.pings.filter((q) => q.r < 520 || q.hits.some((hit) => !hit.activated));
       this.noiseEvents.forEach((n) => { n.age += dt; });
       this.noiseEvents = this.noiseEvents.filter((n) => n.age < 0.35);
+      if (this.isSoundMasked) this.noiseEvents = [];
       this.decoys.forEach((d) => {
         if (d.overcharge) { d.timer -= dt; return; }
         if (![d.x,d.y,d.vx,d.vy,d.timer,d.pingTimer,d.pulseRadius].every(Number.isFinite)) { d.timer = 0; return; }
@@ -718,20 +878,6 @@
         }
       });
       this.decoys = this.decoys.filter((d) => d.timer > 0);
-      this.currents.forEach((c) => {
-        if (distance(p, c) < c.r) {
-          p.x = clamp(
-            p.x + Math.cos(c.angle) * c.force * dt,
-            25,
-            this.width - 25,
-          );
-          p.y = clamp(
-            p.y + Math.sin(c.angle) * c.force * dt,
-            25,
-            this.height - 25,
-          );
-        }
-      });
       this.enemies.forEach((e) => {
         e.phase += dt * 0.2;
         e.attackCooldown = Math.max(0, e.attackCooldown - dt);
@@ -746,18 +892,22 @@
           return;
         }
         if (e.type === "listener") {
+          if (this.isSoundMasked && ["WINDUP", "INVESTIGATE"].includes(e.state)) {
+            e.state = "PATROL"; e.targetX = home.x; e.targetY = home.y; e.windupTimer = 0;
+            this.events.push({ type: "listener-mask-reset" });
+          }
           e.clickAt -= dt;
           if (e.clickAt <= 0) {
             e.clickAt = 3.2;
             this.events.push({ type: "enemy-vocal", enemyType: "LISTENER", pan: clamp((e.x-p.x)/500,-1,1), distNorm: distance(e,p)/550 });
-            if (!p.isMasked && distance(e, p) <= 240 && visible && e.state === "PATROL") {
+            if (!this.isSoundMasked && !p.isMasked && distance(e, p) <= 240 && visible && e.state === "PATROL") {
               p.detected = true;
               e.targetX = p.x; e.targetY = p.y; e.state = "WINDUP"; e.windupTimer = 0.75;
               this.events.push({ type: "listener-windup" });
             }
           }
-          const heard = this.noiseEvents.filter((n) => ["ping","DECOY","ENGINE","scrape","decoy"].includes(n.type))
-            .map((n) => ({ n, d: distance(e,n), radius: n.type === "DECOY" || n.type === "decoy" ? 700 : n.type === "ping" ? 460 : n.type === "scrape" ? 450 : n.type === "ENGINE" ? (n.throttle > .65 ? 160 : 0) : 0 }))
+          const heard = (this.isSoundMasked ? [] : this.noiseEvents).filter((n) => ["ping","DECOY","ENGINE","scrape","decoy"].includes(n.type))
+            .map((n) => ({ n, d: distance(e,n), radius: n.type === "DECOY" || n.type === "decoy" ? 700 : n.type === "ping" ? 460 : n.type === "scrape" ? 450 : n.type === "ENGINE" ? ((n.throttle > .8 || n.speedRatio > .8) ? 115 : 0) : 0 }))
             .find(({n,d,radius}) => d <= radius && (!p.isMasked || n.type !== "sonar"));
           if (heard && e.state === "PATROL") {
             p.detected = true;
@@ -782,7 +932,34 @@
           const d = distance(e,p), bearing = Math.atan2(e.y-p.y,e.x-p.x);
           const beamAngle = Math.abs(Math.atan2(Math.sin(bearing-p.angle),Math.cos(bearing-p.angle)));
           const pinned = p.lamp && p.battery > 0 && d <= 380 && beamAngle <= Math.PI*31/180 && visible;
-          if (e.state === "FLEE") {
+          const pylonState = e.state === "REPELLED" || e.state === "PYLON_WAIT" || e.state === "PYLON_RUSH";
+          const linkedPylon = pylonState ? this.pylons[e.pylonIndex] : null;
+          const activePylon = linkedPylon?.activeTimer > 1.5
+            ? linkedPylon
+            : this.pylons
+              .filter((pylon) => pylon.activeTimer > 1.5 && distance(e, pylon) <= 310)
+              .sort((a, b) => distance(e, a) - distance(e, b))[0];
+          if (activePylon) {
+            e.pylonIndex = this.pylons.indexOf(activePylon);
+            const dx = e.x - activePylon.x, dy = e.y - activePylon.y, len = Math.hypot(dx, dy) || 1;
+            if (len <= 310) {
+              if (e.state !== "REPELLED" && e.state !== "PYLON_WAIT") this.events.push({ type: "stalker-flee", x: e.x, y: e.y });
+              e.state = "REPELLED";
+              e.angle = Math.atan2(dy, dx);
+              target = { x: e.x + dx / len * 420, y: e.y + dy / len * 420 };
+            } else {
+              e.state = "PYLON_WAIT";
+              const orbit = Math.atan2(dy, dx) + Math.sin(this.elapsed * 0.65 + e.phase) * 0.55;
+              target = { x: activePylon.x + Math.cos(orbit) * 326, y: activePylon.y + Math.sin(orbit) * 326 };
+              e.angle = Math.atan2(target.y - e.y, target.x - e.x);
+            }
+            aggressive = true;
+          } else if (pylonState) {
+            // During the final 1.5 seconds the relay flickers; abandon the perimeter and rush in.
+            e.state = "PYLON_RUSH";
+            target = p;
+            aggressive = true;
+          } else if (e.state === "FLEE") {
             e.fleeTimer -= dt;
             const awayX=e.x-p.x, awayY=e.y-p.y, awayDistance=Math.hypot(awayX,awayY)||1;
             target={x:clamp(e.x+awayX/awayDistance*520,25,this.width-25),y:clamp(e.y+awayY/awayDistance*520,25,this.height-25)};
@@ -792,14 +969,14 @@
             p.detected = true;
             if (e.state !== "LIGHT_PINNED") this.events.push({type:"stalker-pinned",x:e.x,y:e.y});
             e.state = "LIGHT_PINNED"; e.pinTimer += dt; e.angle = Math.atan2(p.y-e.y,p.x-e.x);
-            if (e.pinTimer >= 1.1) {
-              e.state="FLEE"; e.fleeTimer=7; e.pinTimer=0;
+            if (e.pinTimer >= 1.3) {
+              e.state="FLEE"; e.fleeTimer=4.5; e.pinTimer=0;
               const awayX=e.x-p.x, awayY=e.y-p.y, awayDistance=Math.hypot(awayX,awayY)||1;
               target={x:clamp(e.x+awayX/awayDistance*520,25,this.width-25),y:clamp(e.y+awayY/awayDistance*520,25,this.height-25)};
               aggressive=true; this.events.push({type:"stalker-flee"});
             }
-          } else if (e.state === "LIGHT_PINNED") { e.state="CREEP"; }
-          else if (d <= 350 && visible && !p.lamp) {
+          } else if (e.state === "LIGHT_PINNED") { e.state="CREEP"; e.pinTimer=0; }
+          else if (d <= 420 && visible && !p.lamp) {
             e.state="CREEP"; target=p; aggressive=true;
             if (this.elapsed >= (e.creepTickAt || 0)) { e.creepTickAt=this.elapsed+Math.max(.18, d/900); this.events.push({type:"stalker-tick",x:e.x,y:e.y,distNorm:d/350}); }
           } else { e.state="DORMANT"; e.pinTimer=0; }
@@ -867,7 +1044,7 @@
         } else if (e.state !== "LUNGE") {
           const angle=Math.atan2(target.y-e.y,target.x-e.x);
           e.angle=angle;
-          const speed=e.type==="lurker" ? (e.state==="FLEE" ? 150 : 82) : 65;
+          const speed=e.type==="lurker" ? (e.state==="REPELLED" ? 165 : e.state==="PYLON_WAIT" ? 72 : e.state==="FLEE" ? 150 : 118) : 65;
           const repulsion=this.wallRepulsion(e);
           this.moveEnemy(e,(Math.cos(angle)+repulsion.x*.75)*speed*dt,(Math.sin(angle)+repulsion.y*.75)*speed*dt);
         }
@@ -926,8 +1103,9 @@
       this.batteries.forEach((b) => {
         if (!b.taken && distance(p, b) < 25) {
           b.taken = true;
-      p.battery = Math.min(100, p.battery + 45);
-          this.events.push({ type: "battery" });
+          if (b.sonarCharge) p.sonarCharges = Math.min(this.level.levelRules.maxPings, p.sonarCharges + this.level.levelRules.pingPickup);
+          else p.battery = Math.min(100, p.battery + 45);
+          this.events.push({ type: b.sonarCharge ? "charge" : "battery" });
         }
       });
       this.rocks.forEach((r) => {
@@ -944,9 +1122,9 @@
             this.events.push({ type: "scrape" });
             this.noiseEvents.push({ type: "scrape", x: p.x, y: p.y, age: 0, radius: 500 });
           }
-          if (impactSpeed > 35 && this.elapsed - this.lastNoise > 1.2) {
+          if (impactSpeed > 35 && (this.level.levelRules.maxHull || this.elapsed - this.lastNoise > 1.2)) {
             this.damage(20, "HULL CRUSHED AGAINST ROCK");
-            p.leaking = true;
+            p.leaking = this.level.levelRules.maxHull ? false : true;
           }
         }
       });
@@ -1038,17 +1216,6 @@
         ctx.lineTo(this.width, y);
         ctx.stroke();
       }
-      this.currents.forEach((c) => {
-        ctx.strokeStyle =
-          c.force > 25 ? "rgba(231,166,100,.3)" : "rgba(105,178,172,.22)";
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, c.r, 0, 7);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(c.x, c.y);
-        ctx.lineTo(c.x + Math.cos(c.angle) * 28, c.y + Math.sin(c.angle) * 28);
-        ctx.stroke();
-      });
       const ts = this.tileSize;
       // Build a continuous rock mass from smoothed cells; overlapping rounded cells soften the silhouette.
       ctx.fillStyle = "#0b131e";
@@ -1076,6 +1243,57 @@
       ctx.strokeStyle = "rgba(58,124,165,.7)";
       ctx.lineWidth = 1;
       ctx.stroke();
+      this.vents.forEach((vent) => {
+        const active = this.rumbleActive;
+        const pulse = active ? .82 + Math.sin(this.elapsed * 25 + vent.phase) * .16 : .42 + Math.sin(this.elapsed * 2.4 + vent.phase) * .1;
+        ctx.save(); ctx.translate(vent.x, vent.y);
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = "#261a14"; ctx.strokeStyle = active ? "#ffbd63" : "#a96639"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(0, 0, vent.radius, vent.radius * .66, Math.sin(vent.phase) * .15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        const core = ctx.createRadialGradient(0, 0, 2, 0, 0, vent.radius * (active ? .94 : .72));
+        core.addColorStop(0, active ? "rgba(255,245,174,.98)" : "rgba(255,190,99,.76)");
+        core.addColorStop(.22, active ? "rgba(255,139,43,.92)" : "rgba(229,111,43,.68)");
+        core.addColorStop(1, "rgba(205,76,32,0)");
+        ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, vent.radius * (active ? .94 : .72), 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = .48 + pulse * .35;
+        ctx.strokeStyle = "rgba(255,190,112,.72)"; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) {
+          const x = -15 + i * 10, drift = Math.sin(this.elapsed * 4 + vent.phase + i * 2) * 5;
+          ctx.beginPath(); ctx.moveTo(x, -5 - ((this.elapsed * 28 + i * 13 + vent.phase * 8) % 33));
+          ctx.quadraticCurveTo(x + drift, -22, x + drift * 1.5, -vent.radius * .9); ctx.stroke();
+        }
+        ctx.globalAlpha = active ? .23 : .12;
+        ctx.fillStyle = "#ffc17a";
+        for (let i = 0; i < 3; i++) {
+          const rise = (this.elapsed * 34 + i * 17 + vent.phase * 11) % 50;
+          const x = Math.sin(this.elapsed * 2 + vent.phase + i * 4) * 13;
+          ctx.beginPath(); ctx.arc(x, -rise, 1.2 + (i % 2) * .6, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      });
+      this.pylons.forEach((pylon) => {
+        const active = pylon.activeTimer > 0;
+        const flicker = active && pylon.activeTimer <= 1.5 ? .62 + Math.random() * .34 : 1;
+        ctx.save(); ctx.translate(pylon.x, pylon.y);
+        if (active) {
+          const dome = ctx.createRadialGradient(0, 0, 8, 0, 0, pylon.maxRadius);
+          dome.addColorStop(0, `rgba(255,207,139,${.16 * flicker})`);
+          dome.addColorStop(.72, `rgba(255,173,102,${.085 * flicker})`);
+          dome.addColorStop(1, "rgba(248,157,91,0)");
+          ctx.fillStyle = dome; ctx.beginPath(); ctx.arc(0, 0, pylon.maxRadius, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = `rgba(255,195,133,${.24 * flicker})`; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(0, 0, pylon.maxRadius - 3, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.globalAlpha = active ? flicker : .54;
+        ctx.fillStyle = active ? "#f3cd9b" : "#518a8e";
+        ctx.strokeStyle = active ? "#fff0c9" : "#87d6d2";
+        ctx.shadowColor = active ? "#ffb45d" : "#51e5d9"; ctx.shadowBlur = active ? 16 : 3;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(0,-15); ctx.lineTo(9,-3); ctx.lineTo(6,12); ctx.lineTo(-6,12); ctx.lineTo(-9,-3); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur = 0; ctx.strokeStyle = active ? "#fff1c9" : "#b9f3e4"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0,-12); ctx.lineTo(0,9); ctx.moveTo(-6,-3); ctx.lineTo(6,-3); ctx.stroke();
+        ctx.restore();
+      });
       this.mines.forEach((m) => {
         if (!m.armed) return;
         const pulse = .55 + (Math.sin(this.elapsed * 5 + m.x) + 1) * .2;
@@ -1130,8 +1348,45 @@
         ctx.restore();
       });
       this.drawMagnetarCores(ctx);
+      this.drawVentGlows(ctx);
+      this.drawPylonGlows(ctx);
       this.drawSonarDots(ctx);
       this.drawPlayer(ctx);
+    }
+    drawVentGlows(ctx) {
+      this.vents.forEach((vent) => {
+        const active = this.rumbleActive;
+        const pulse = .6 + Math.sin(this.elapsed * (active ? 25 : 3) + vent.phase) * .16;
+        ctx.save();
+        const halo = ctx.createRadialGradient(vent.x, vent.y, 3, vent.x, vent.y, vent.radius);
+        halo.addColorStop(0, `rgba(255,${active ? 170 : 132},${active ? 71 : 48},${active ? .42 : .18})`);
+        halo.addColorStop(1, "rgba(226,104,42,0)");
+        ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(vent.x, vent.y, vent.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = active ? "#ffd18a" : "#ee9b54";
+        ctx.globalAlpha = pulse;
+        ctx.shadowColor = "#ff9c47"; ctx.shadowBlur = active ? 14 : 7;
+        ctx.beginPath(); ctx.arc(vent.x, vent.y, active ? 5 : 3.5, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = active ? .58 : .32;
+        ctx.fillStyle = "#ffc17a";
+        for (let i = 0; i < 3; i++) {
+          const rise = (this.elapsed * 34 + i * 17 + vent.phase * 11) % 34;
+          const drift = Math.sin(this.elapsed * 2 + vent.phase + i * 4) * 10;
+          ctx.beginPath(); ctx.arc(vent.x + drift, vent.y - rise, 1 + (i % 2) * .5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      });
+    }
+    drawPylonGlows(ctx) {
+      this.pylons.forEach((pylon) => {
+        if (pylon.activeTimer <= 0) return;
+        const flicker = pylon.activeTimer <= 1.5 ? .58 + Math.random() * .38 : 1;
+        ctx.save(); ctx.globalAlpha = flicker;
+        const glow = ctx.createRadialGradient(pylon.x, pylon.y, 4, pylon.x, pylon.y, pylon.maxRadius);
+        glow.addColorStop(0, "rgba(255,211,153,.27)"); glow.addColorStop(.72, "rgba(255,175,115,.12)"); glow.addColorStop(1, "rgba(255,160,97,0)");
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(pylon.x, pylon.y, pylon.maxRadius, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      });
     }
     drawMagnetarCores(ctx) {
       this.enemies.filter((e) => e.type === "magnetar" && !e.dead).forEach((e) => {
@@ -1192,7 +1447,13 @@
         ctx.globalAlpha = .72; ctx.fillStyle = "#4c3e67"; ctx.strokeStyle = "#ac87ca"; ctx.lineWidth = .8;
         ctx.beginPath(); ctx.moveTo(18, 0); ctx.quadraticCurveTo(3, -4, -6, -22); ctx.quadraticCurveTo(-13, -13, -18, -8); ctx.quadraticCurveTo(-10, -2, -12, 0); ctx.quadraticCurveTo(-10, 2, -18, 8); ctx.quadraticCurveTo(-13, 13, -6, 22); ctx.quadraticCurveTo(3, 4, 18, 0); ctx.fill(); ctx.stroke();
         ctx.globalAlpha = 1; ctx.fillStyle = "#d59cff"; ctx.shadowColor = "#c577ff"; ctx.shadowBlur = 8;
-        ctx.beginPath(); ctx.arc(10, -2, 1.8, 0, 7); ctx.arc(10, 2, 1.8, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+        const eyeSize = e.pinTimer > 0 ? 1 : 1.8;
+        ctx.beginPath(); ctx.arc(10, -2, eyeSize, 0, 7); ctx.arc(10, 2, eyeSize, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = "#aa7fd0"; ctx.lineWidth = .7;
+        for (let i = 0; i < 3; i++) {
+          const side = i - 1, sway = Math.sin(this.elapsed * 3 + i) * 3;
+          ctx.beginPath(); ctx.moveTo(-8, side * 5); ctx.quadraticCurveTo(-18, side * 9 + sway, -27 - i * 3, side * 15 + sway); ctx.stroke();
+        }
       } else if (e.type === "magnetar") {
         const charge = e.state === "CHARGE_SURGE" ? 1 : 0;
         const flicker = 0.75 + Math.sin(this.elapsed * 23 + e.phase) * 0.2;
@@ -1244,9 +1505,9 @@
         ctx.fill();
       }
       ctx.globalAlpha = 1;
-      const hullGlow = ctx.createRadialGradient(0, 0, 3, 0, 0, 22);
-      hullGlow.addColorStop(0, "rgba(174,220,245,.045)"); hullGlow.addColorStop(1, "rgba(150,205,235,0)");
-      ctx.fillStyle = hullGlow; ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+      const hullGlow = ctx.createRadialGradient(0, 0, 6, 0, 0, 26);
+      hullGlow.addColorStop(0, "rgba(140,220,255,.055)"); hullGlow.addColorStop(1, "rgba(140,220,255,0)");
+      ctx.fillStyle = hullGlow; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill();
       if (p.isMasked) {
         ctx.strokeStyle="rgba(110,255,149,.8)";ctx.lineWidth=1.5;ctx.shadowColor="#59ff91";ctx.shadowBlur=6;
         ctx.beginPath();ctx.ellipse(0,0,24,11,0,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;

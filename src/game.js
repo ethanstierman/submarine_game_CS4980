@@ -46,11 +46,25 @@
       s = Math.floor(seconds % 60);
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
+  function creatureLabel(subtype) {
+    switch (String(subtype || "").toLowerCase()) {
+      case "lurker":
+      case "stalker":
+      case "shade_stalker":
+        return "SHADE STALKER";
+      case "magnetar":
+        return "MAGNETAR EMP";
+      case "listener":
+        return "LISTENER";
+      default:
+        return "UNKNOWN BIOLOGICAL CONTACT";
+    }
+  }
   function threatCount(level) {
     return (
       level.mines +
-      level.currents +
-      level.strongCurrents +
+      (level.vents || 0) +
+      (level.pylonCount || 0) +
       level.batteries +
       Object.values(level.enemies).reduce((a, b) => a + b, 0)
     );
@@ -146,17 +160,26 @@
   }
   function processEvents() {
     for (const e of world.events.splice(0)) {
-      if (e.type === "ping") playSonarAudio(world.pings[world.pings.length - 1]);
+      if (e.type === "ping") {
+        const ping = world.pings[world.pings.length - 1];
+        playSonarAudio(ping);
+        const first = ping?.hits?.slice().sort((a,b) => a.dist - b.dist)[0];
+        if (first) showToast({ STONE: "[ECHO: CAVERN WALL]", MINE: "[ECHO: BIO-MINE]", PYLON: "[ECHO: RELAY PYLON]", FLESH: `[HYDROPHONE: ${creatureLabel(first.subtype)}]`, BEACON: "[SIGNAL: EXIT BEACON]", BATTERY: "[SIGNAL: BATTERY CELL]" }[first.kind] || "[ECHO: CAVERN WALL]");
+      }
       if (e.type === "flesh-echo") GameAudio.playCreatureEcho(0, e.pan, e.distNorm);
       if (e.type === "enemy-vocal") GameAudio.playCreatureVocalization(e.enemyType, e.pan, e.distNorm);
       if (e.type === "magnetar-lock") GameAudio.playCreatureVocalization("HUNTER", e.pan, e.distNorm);
-      if (e.type === "magnetar-emp") { GameAudio.playMagnetarDischarge(); shake = Math.max(shake, 18); }
+      if (e.type === "magnetar-emp") { GameAudio.playMagnetarDischarge(); shake = Math.max(shake, 18); showToast("[HYDROPHONE: MAGNETAR EMP]"); }
+      if (e.type === "pylon-activated") {
+        GameAudio.playRelayActivation();
+        showToast(e.firstCharge ? "[RELAY IGNITED: +3 SONAR CHARGES]" : "[RELAY PYLON: LIGHT REIGNITED · 6.0s]");
+      }
       if (e.type === "enemy-passive") GameAudio.playCreatureEcho(0, e.pan, Math.min(1, e.distNorm + 0.2));
       if (e.type === "listener-windup") { GameAudio.creatureRattle(); showToast("[HYDROPHONE: LISTENER]"); }
       if (e.type === "wall-stun") { GameAudio.creatureImpact(); shake = Math.max(shake, 10); }
       if (e.type === "enemy-mine-kill") { GameAudio.mineExplosion(); GameAudio.playMagnetarDischarge(); shake = Math.max(shake, 16); }
       if (e.type === "creature-brawl") { GameAudio.creatureImpact(); shake = Math.max(shake, 9); }
-      if (e.type === "stalker-tick") { GameAudio.stalkerTick(e.distNorm); if (e.distNorm < .8) showToast("[HYDROPHONE: STALKER]"); }
+      if (e.type === "stalker-tick") { GameAudio.stalkerTick(e.distNorm); if (e.distNorm < .8) showToast("[HYDROPHONE: SHADE STALKER]"); }
       if (e.type === "enemy-vocal") showToast("[HYDROPHONE: LISTENER]");
       if (e.type === "stalker-pinned" || e.type === "stalker-flee") GameAudio.stalkerScreech();
       if (e.type === "tactical-kill") showToast("[THREAT NEUTRALIZED: MINE DETONATION] +500 TACTICAL KILL");
@@ -171,6 +194,11 @@
       if (e.type === "win") GameAudio.contact();
       if (e.type === "lose") GameAudio.implosion();
       if (e.type === "battery") showToast("BATTERY CELL RECOVERED");
+      if (e.type === "charge") {
+        GameAudio.enable();
+        GameAudio.scheduleEcho(0, 0, 0, "BATTERY");
+        showToast(`[SONAR CHARGES: ${world.player.sonarCharges} / ${selectedLevel.levelRules.maxPings}]`);
+      }
       if (e.type === "battery-warning") GameAudio.lowBatteryWarning();
       if (e.type === "tether")
         showToast("TETHER SEVERED — PHOSPHOR TRAIL LOST");
@@ -191,17 +219,25 @@
   }
   function triggerSonarPing(x = world.player.x, y = world.player.y, isPlayer = true) {
     const ping = world.triggerSonarPing(x, y, isPlayer);
-    if (!ping) return false;
+    if (!ping) {
+      if (isPlayer && Number.isFinite(world.player.sonarCharges) && world.player.sonarCharges <= 0) showToast("[SONAR CAPACITORS DEPLETED]");
+      return false;
+    }
     playSonarAudio(ping);
+    if (isPlayer) {
+      const first = ping.hits.slice().sort((a,b) => a.dist - b.dist)[0];
+      if (first) showToast({ STONE: "[ECHO: CAVERN WALL]", MINE: "[ECHO: BIO-MINE]", PYLON: "[ECHO: RELAY PYLON]", FLESH: `[HYDROPHONE: ${creatureLabel(first.subtype)}]`, BEACON: "[SIGNAL: EXIT BEACON]", BATTERY: "[SIGNAL: BATTERY CELL]" }[first.kind] || "[ECHO: CAVERN WALL]");
+    }
     return true;
   }
   function showToast(message) {
     const el = $("toast");
     el.textContent = message;
-    el.style.color = message.includes("SONAR ECHO: STONE") ? "#70edff"
+    el.style.color = message.includes("CAVERN WALL") ? "#70edff"
       : message.includes("BIO-MINE") ? "#ffc16d"
       : message.includes("LISTENER") ? "#ff6475"
-      : message.includes("STALKER") || message.includes("MAGNETAR") ? "#d49aff"
+      : message.includes("SHADE STALKER") ? "#bd83f0"
+      : message.includes("MAGNETAR EMP") ? "#d97cff"
       : message.includes("EXIT BEACON") ? "#7ff0ae" : "";
     el.classList.add("show");
     clearTimeout(toastTimer);
@@ -231,7 +267,7 @@
     ctx.scale(zoom, zoom);
     ctx.translate(-ox, -oy);
     world.draw(ctx);
-    drawLighting(p, rect);
+    drawLighting(p, rect, zoom);
     if (p.lamp && p.battery > 0) {
       ctx.save(); ctx.globalCompositeOperation = "screen"; ctx.globalAlpha = .035;
       ctx.translate(p.x, p.y); ctx.rotate(p.angle);
@@ -270,7 +306,7 @@
       ctx.fillText("POSITION FIX ACQUIRED", rect.width / 2, 42); ctx.restore();
     }
   }
-  function drawLighting(p, rect) {
+  function drawLighting(p, rect, zoom) {
     const cx = rect.width / 2, cy = rect.height / 2;
     lightCtx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     lightCtx.globalCompositeOperation = "source-over";
@@ -279,29 +315,45 @@
     lightCtx.fillStyle = "rgba(0,0,0,1)";
     lightCtx.fillRect(0, 0, rect.width, rect.height);
     lightCtx.globalCompositeOperation = "destination-out";
-    const halo = lightCtx.createRadialGradient(cx, cy, 1, cx, cy, 22);
-    halo.addColorStop(0, "rgba(210,235,255,.045)");
-    halo.addColorStop(.45, "rgba(190,220,250,.02)");
-    halo.addColorStop(1, "rgba(170,210,245,0)");
+    const halo = lightCtx.createRadialGradient(cx, cy, 6, cx, cy, 26);
+    halo.addColorStop(0, "rgba(140,220,255,.055)");
+    halo.addColorStop(.45, "rgba(140,220,255,.028)");
+    halo.addColorStop(1, "rgba(140,220,255,0)");
     lightCtx.fillStyle = halo;
-    lightCtx.beginPath(); lightCtx.arc(cx, cy, 22, 0, Math.PI * 2); lightCtx.fill();
+    lightCtx.beginPath(); lightCtx.arc(cx, cy, 26, 0, Math.PI * 2); lightCtx.fill();
     if (p.lamp && p.battery > 0) {
       lightCtx.save();
       lightCtx.translate(cx, cy); lightCtx.rotate(p.angle);
-      const range = 380 * (p.lampIntensity || 1), halfAngle = Math.PI * 34 / 180;
-      const beam = lightCtx.createRadialGradient(0, 0, 12, 0, 0, range);
-      beam.addColorStop(0, "rgba(205,235,255,.94)");
-      beam.addColorStop(.38, "rgba(175,220,250,.72)");
-      beam.addColorStop(.72, "rgba(125,190,230,.4)");
-      beam.addColorStop(1, "rgba(85,150,205,0)");
-      lightCtx.fillStyle = beam;
-      lightCtx.filter = "blur(18px)";
-      lightCtx.beginPath(); lightCtx.moveTo(0, 0);
-      lightCtx.arc(0, 0, range, -halfAngle, halfAngle);
-      lightCtx.closePath(); lightCtx.fill();
+      const range = 380 * (p.lampIntensity || 1);
+      [[72,.17],[54,.22],[36,.18]].forEach(([spread, opacity]) => {
+        const halfAngle = Math.PI * spread / 360;
+        const beam = lightCtx.createRadialGradient(0, 0, 12, 0, 0, range);
+        beam.addColorStop(0, `rgba(205,235,255,${opacity})`);
+        beam.addColorStop(.38, `rgba(175,220,250,${opacity * .76})`);
+        beam.addColorStop(.72, `rgba(125,190,230,${opacity * .38})`);
+        beam.addColorStop(1, "rgba(85,150,205,0)");
+        lightCtx.fillStyle = beam;
+        lightCtx.filter = "blur(12px)";
+        lightCtx.beginPath(); lightCtx.moveTo(0, 0);
+        lightCtx.arc(0, 0, range, -halfAngle, halfAngle);
+        lightCtx.closePath(); lightCtx.fill();
+      });
       lightCtx.filter = "none";
       lightCtx.restore();
     }
+    world.pylons.forEach((pylon) => {
+      if (pylon.activeTimer <= 0) return;
+      const px = cx + (pylon.x - p.x) * zoom, py = cy + (pylon.y - p.y) * zoom;
+      const radius = pylon.maxRadius * zoom;
+      const flicker = pylon.activeTimer > 1.5 ? 1 : .42 + Math.random() * .56;
+      const dome = lightCtx.createRadialGradient(px, py, 3, px, py, radius);
+      dome.addColorStop(0, `rgba(255,242,218,${.98 * flicker})`);
+      dome.addColorStop(.72, `rgba(255,225,187,${.94 * flicker})`);
+      dome.addColorStop(.94, `rgba(255,205,165,${.76 * flicker})`);
+      dome.addColorStop(1, "rgba(255,190,150,0)");
+      lightCtx.filter = "none"; lightCtx.globalAlpha = 1; lightCtx.fillStyle = dome;
+      lightCtx.beginPath(); lightCtx.arc(px, py, radius, 0, Math.PI * 2); lightCtx.fill();
+    });
     lightCtx.globalCompositeOperation = "source-over";
     lightCtx.globalAlpha = 1;
     ctx.save();
@@ -424,12 +476,12 @@
   function drawHydrophone(w,h,cx,cy) {
     const p=world.player,r=65;
     ctx.save(); ctx.globalAlpha=.8; ctx.strokeStyle="#83d8c866";ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.stroke();
-    const priority = { FLESH: 0, MINE: 1, BEACON: 2, BATTERY: 2, STONE: 3 };
+    const priority = { FLESH: 0, PYLON: 1, MINE: 2, BEACON: 3, BATTERY: 3, STONE: 4 };
     [...world.echoes].sort((a,b) => (priority[a.kind] ?? 4) - (priority[b.kind] ?? 4) || a.age - b.age).slice(0,8).forEach((e,i)=>{
       const a=e.angle, age=e.age, rr=r+8+(i%3)*5;
       ctx.globalAlpha=Math.max(.2,1-age/2.8);ctx.strokeStyle=e.color;ctx.lineWidth=2;
       ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*(rr-4),cy+Math.sin(a)*(rr-4));ctx.lineTo(cx+Math.cos(a)*(rr+5),cy+Math.sin(a)*(rr+5));ctx.stroke();
-      if(audioVisualAssist){ctx.fillStyle=e.color;ctx.font="bold 8px monospace";ctx.textAlign="center";const names={STONE:"[SONAR ECHO: STONE]",MINE:"[SONAR ECHO: BIO-MINE]",FLESH:e.subtype==="lurker"?"[HYDROPHONE: STALKER]":e.subtype==="magnetar"?"[SONAR ECHO: MAGNETAR]":"[HYDROPHONE: LISTENER]",BEACON:"[OBJECTIVE: EXIT BEACON LOCKED]"};ctx.fillText(names[e.kind]||e.kind,cx+Math.cos(a)*(r+28),cy+Math.sin(a)*(r+25));}
+      if(audioVisualAssist){ctx.fillStyle=e.color;ctx.font="bold 8px monospace";ctx.textAlign="center";const names={STONE:"[ECHO: CAVERN WALL]",MINE:"[ECHO: BIO-MINE]",PYLON:"[ECHO: RELAY PYLON]",FLESH:`[HYDROPHONE: ${creatureLabel(e.subtype)}]`,BEACON:"[SIGNAL: EXIT BEACON]"};ctx.fillText(names[e.kind]||e.kind,cx+Math.cos(a)*(r+28),cy+Math.sin(a)*(r+25));}
     });
     world.enemies.filter((e)=>e.type==="listener"&&e.state==="WINDUP").forEach((e)=>{
       const a=Math.atan2(e.targetY-world.player.y,e.targetX-world.player.x)-world.player.angle;
@@ -453,7 +505,7 @@
       ctx.globalAlpha = 1;
       if (emp > 0.35) {
         ctx.fillStyle = "#dc8cff"; ctx.font = "bold 8px monospace"; ctx.textAlign = "center";
-        ctx.fillText("[HYDROPHONE: MAGNETAR EMP FIELD]", cx, cy + r + 24);
+        ctx.fillText("[HYDROPHONE: MAGNETAR EMP]", cx, cy + r + 24);
       }
     }
     ctx.restore();
@@ -469,6 +521,11 @@
     $("hull-meter").style.width = `${p.hull}%`;
     $("battery-value").textContent = `${Math.round(p.battery)}%`;
     $("battery-meter").style.width = `${p.battery}%`;
+    const chargeReadout = $("sonar-charges");
+    if (Number.isFinite(p.sonarCharges)) {
+      chargeReadout.textContent = `SONAR CHARGES: ${String(p.sonarCharges).padStart(2,"0")} / ${selectedLevel.levelRules.maxPings}`;
+      chargeReadout.classList.remove("hidden");
+    } else chargeReadout.classList.add("hidden");
     const prog = Math.max(
       0,
       Math.min(
@@ -477,8 +534,8 @@
           (1 -
             Math.hypot(world.goal.x - p.x, world.goal.y - p.y) /
               Math.hypot(
-                world.goal.x - 65,
-                world.goal.y - (world.height - 70),
+                world.goal.x - world.spawnPoint.x,
+                world.goal.y - world.spawnPoint.y,
               )) *
             100,
         ),
@@ -487,6 +544,19 @@
     $("progress-bar").style.width = `${prog}%`;
     $("progress-label").textContent = `${prog}% TO EXTRACTION`;
     $("mission-time").textContent = fmt(world.elapsed);
+    const ventStatus = $("vent-status");
+    if (selectedLevel.vents) {
+      const phase = world.elapsed % 6.5;
+      ventStatus.classList.remove("hidden");
+      ventStatus.classList.toggle("active", world.rumbleActive);
+      ventStatus.textContent = world.rumblePhase === "WARNING"
+        ? `[VENT PULSE: WARNING HISS · ${(1 - phase).toFixed(1)}s]`
+        : world.rumblePhase === "ACTIVE"
+          ? `[VENT PULSE: RUMBLE ACTIVE · ${(4.5 - phase).toFixed(1)}s]`
+          : world.rumblePhase === "REVERB"
+            ? `[VENT PULSE: ACOUSTIC REVERB · ${(5.5 - phase).toFixed(1)}s]`
+            : `[VENT PULSE: CALM · ${(6.5 - phase).toFixed(1)}s]`;
+    } else ventStatus.classList.add("hidden");
     $("mission-status").textContent = world.enemies.some(
       (e) => !["PATROL", "DORMANT"].includes(e.state),
     )
@@ -539,10 +609,14 @@
     renderMissions();
   }
   function enemyIntel(level) {
+    if (level.briefingIntel) return level.briefingIntel;
+    if (level.pylonCount) return `${level.pylonCount} dormant Floodlight Pylons are distributed along the descent. Sonar returns reveal their crystal signatures; the active 260-meter domes repel Shade Stalkers, and first-time relay activations recharge sonar.`;
+    if (level.topology === "LABYRINTH_GRID") return "Survey returns map a tight, right-angled rock lattice with several acoustic chambers that do not continue. Three green charge canisters are registered in isolated side pockets; only the hull-mounted hydrophone remains operational.";
+    if (level.topology === "GRAND_CHAMBERS" && !Object.values(level.enemies || {}).some(Boolean)) return "The sector alternates narrow passages with vast hollow chambers. Repeated sonar returns indicate dense rock forms suspended inside several of the larger voids.";
     const creatures = [
-      ["listener", "A blind leviathan has entered the hydrophone band. Its calls arrive as pressure in the teeth; the silence between them is the part that listens."],
-      ["lurker", "A Shade Stalker moves where the lamp cannot hold the water. Retinal telemetry catches two violet points, then records them closing."],
-      ["magnetar", "Magnetar signature ahead: a cathedral-sized jellyfish wrapped in violet charge. Compass drift is rising; the pulses are beginning to answer one another."],
+      ["listener", "Long-range hydrophone telemetry registers a blind bio-acoustic leviathan in this sector. Subject exhibits violent straight-line lunging behavior toward sudden seismic noise and active sonar sweeps."],
+      ["lurker", "Retinal scanner logs indicate photosensitive predatory organisms inhabiting unlit rifts. They actively stalk movement signatures in pitch darkness, but recoil from direct high-lumen beams."],
+      ["magnetar", "Electromagnetic anomalies detected ahead. Bio-electric aura heavily scrambles onboard instrumentation. Subject is deaf to mechanical propeller noise, but surges aggressively toward active electrical pulses and light emission."],
     ];
     const depthIndex = LEVELS.findIndex((entry) => entry.id === level.id);
     const previouslySeen = new Set(
@@ -569,7 +643,13 @@
     $("briefing-title").textContent = level.title;
     $("briefing-objective").textContent = `Depth ${level.depth === "DAILY" ? "varies by seed" : `${level.depth} m`}. Hazard level: ${threatCount(level)} contacts and environmental threats. Primary objective: reach the exit beacon and return the vessel intact.`;
     $("briefing-intel").textContent = enemyIntel(level);
-    $("briefing-meta").textContent = `${level.subtitle} · SEED ${level.seed} · EST. ${fmt(level.parTime)}`;
+    const rules = level.levelRules || {};
+    const environment = [rules.maxHull ? `HULL COMPROMISED (${rules.maxHull} HP)` : "STANDARD HULL",
+      rules.lampDisabled ? "LAMP OFFLINE" : "LAMP AVAILABLE",
+      Number.isFinite(rules.maxPings) ? `${rules.maxPings} SONAR CHARGES` : "UNLIMITED SONAR",
+      level.pylonCount ? `${level.pylonCount} FLOODLIGHT PYLONS` : "",
+      level.vents ? `${level.vents} HYDROTHERMAL VENTS` : ""].filter(Boolean).join(" | ");
+    $("briefing-meta").textContent = `TOPOLOGY: ${level.topology || "GRAND_CHAMBERS"} · ${environment} · SEED ${level.seed} · EST. ${fmt(level.parTime)}`;
     $("mission-briefing").classList.remove("hidden");
   }
   function customLevel() {
@@ -577,7 +657,7 @@
     if (!value) return;
     const seed = /^\d+$/.test(value) ? Number(value) >>> 0 : dailySeed(value);
     const l = {
-      ...LEVELS[4],
+      ...LEVELS[LEVELS.length - 1],
       id: `custom-${seed}`,
       title: "CUSTOM OPERATION",
       subtitle: "Seeded trench",
@@ -600,7 +680,9 @@
     if (!world.paused) {
       last = performance.now();
       requestAnimationFrame(frame);
-    } else showToast("MISSION PAUSED");
+    } else {
+      showToast("MISSION PAUSED");
+    }
   }
   const controlKey = {
     w: "forward",
@@ -616,6 +698,11 @@
   };
   window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
+    if (e.code === "Space" && !$("mission-briefing").classList.contains("hidden")) {
+      e.preventDefault();
+      start(selectedLevel);
+      return;
+    }
     if (controlKey[k]) {
       keys[controlKey[k]] = true;
       e.preventDefault();
@@ -630,6 +717,11 @@
       showToast(`DECOY RELEASED — ${world.player.decoys} REMAINING`);
     }
     if (k === "f" && active) {
+      if (selectedLevel.levelRules?.lampDisabled) {
+        GameAudio.tone({ freq: 180, end: 72, duration: .12, type: "square", volume: .045 });
+        showToast("[OPTICS SHATTERED: LAMP OFFLINE]");
+        return;
+      }
       world.update(0, { lamp: true });
       showToast(
         world.player.lamp ? "LAMP ONLINE — BATTERY DRAINING" : "LAMP OFF",
