@@ -6,9 +6,14 @@
       this.master = null;
       this.enabled = false;
       this.ambientNodes = [];
+      this.continuousGains = new Set();
+      this.activeScheduledNodes = new Set();
+      this.activeTimeouts = new Set();
+      this.activePanners = new Set();
       this.pingAt = 0;
       this.engine = null;
       this.magnetarHum = null;
+      this.ambientGain = null;
     }
     enable() {
       if (this.enabled) {
@@ -43,6 +48,8 @@
       filter.type = "lowpass";
       filter.frequency.value = 115;
       gain.gain.value = 0.045;
+      this.ambientGain = gain;
+      this.continuousGains.add(gain);
       osc.connect(filter).connect(gain).connect(this.master);
       osc.start();
       const lfo = c.createOscillator(),
@@ -77,6 +84,7 @@
       throb.type = "sine"; throb.frequency.value = 3; throbGain.gain.value = 0;
       throb.connect(throbGain).connect(humGain.gain); throb.start();
       this.engine = { hum, humGain, body, bodyGain, filter, noiseGain, lfo, lfoGain, whine, whineGain, throb, throbGain };
+      [humGain, bodyGain, noiseGain, whineGain].forEach((node) => this.continuousGains.add(node));
     }
     updateEngineSound(throttleRatio = 0, speedRatio = 0, isSilent = false) {
       if (!this.ctx || !this.enabled) return;
@@ -94,6 +102,12 @@
       ramp(e.throb.frequency, 2.4 + power * 2.8); ramp(e.throbGain.gain, power > .01 ? .012 + power * .018 : 0);
       ramp(e.whine.frequency, 240 + power * 140); ramp(e.whineGain.gain, !isSilent && power > .7 ? .004 + (power - .7) * .012 : .001);
     }
+    resumeLoops() {
+      if (!this.ctx || !this.enabled || !this.ambientGain) return;
+      const now = this.ctx.currentTime;
+      this.ambientGain.gain.cancelScheduledValues(now);
+      this.ambientGain.gain.setTargetAtTime(0.045, now, 0.08);
+    }
     initMagnetarHum() {
       if (!this.ctx || this.magnetarHum) return;
       const c = this.ctx, out = this.spatialPan(0) || this.master;
@@ -104,6 +118,7 @@
       overtone.type = "sawtooth"; overtone.frequency.value = 110;
       baseGain.gain.value = 0.72; overtoneGain.gain.value = 0.28;
       gain.gain.value = 0.0001;
+      this.continuousGains.add(gain);
       lfo.type = "sine"; lfo.frequency.value = 2.2; lfoGain.gain.value = 0.2;
       lfo.connect(lfoGain).connect(gain.gain);
       base.connect(baseGain).connect(gain); overtone.connect(overtoneGain).connect(gain);
@@ -129,7 +144,7 @@
     playMagnetarLock(pan = 0, distNorm = 0) {
       if (!this.enabled || !this.ctx) return;
       const c = this.ctx, now = c.currentTime, out = this.spatialPan(pan) || this.master;
-      if (out !== this.master) setTimeout(() => out.disconnect(), 1250);
+      if (out !== this.master) this.trackTimeout(() => { out.disconnect(); this.activePanners.delete(out); }, 1250);
       const carrier = c.createOscillator(), mod = c.createOscillator(), modGain = c.createGain();
       const filter = c.createBiquadFilter(), gain = c.createGain();
       carrier.type = "sawtooth"; carrier.frequency.setValueAtTime(180, now);
@@ -212,7 +227,7 @@
       const safeDistance = Number.isFinite(distNorm) ? Math.max(0, Math.min(1, distNorm)) : 1;
       const c = this.ctx, start = c.currentTime + safeDelay;
       const panner = this.spatialPan(safePan), out = panner || this.master;
-      if (panner) setTimeout(() => panner.disconnect(), (safeDelay + 0.5) * 1000);
+      if (panner) this.trackTimeout(() => { panner.disconnect(); this.activePanners.delete(panner); }, (safeDelay + 0.5) * 1000);
       const tones = {
         STONE: [720, "sine"], MINE: [390, "triangle"], FLESH: [210, "sawtooth"],
         BEACON: [960, "sine"], BATTERY: [1120, "triangle"], PYLON: [1380, "sine"],
@@ -226,6 +241,7 @@
       gain.gain.linearRampToValueAtTime(Number.isFinite(volume) ? volume : 0, start + 0.018);
       gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
       osc.connect(filter).connect(gain).connect(out);
+      this.trackScheduled(osc, gain, panner);
       osc.start(start); osc.stop(start + 0.25);
     }
     spatialPan(pan) {
@@ -233,7 +249,44 @@
       const node = this.ctx.createStereoPanner();
       node.pan.value = Number.isFinite(pan) ? Math.max(-1, Math.min(1, pan)) : 0;
       node.connect(this.master);
+      this.activePanners.add(node);
       return node;
+    }
+    trackTimeout(callback, delay) {
+      const timeout = setTimeout(() => {
+        this.activeTimeouts.delete(timeout);
+        callback();
+      }, delay);
+      this.activeTimeouts.add(timeout);
+      return timeout;
+    }
+    trackScheduled(...nodes) {
+      const active = nodes.filter(Boolean);
+      this.activeScheduledNodes.add(active);
+      const source = active.find((node) => typeof node.addEventListener === "function" && ("onended" in node));
+      if (source) source.addEventListener("ended", () => this.activeScheduledNodes.delete(active), { once: true });
+    }
+    stopAllLoops() {
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      this.continuousGains.forEach((node) => {
+        try {
+          node.gain.cancelScheduledValues(now);
+          node.gain.setTargetAtTime(0.0001, now, 0.02);
+          node.gain.value = 0.0001;
+        } catch (_) {}
+      });
+      this.activeTimeouts.forEach((id) => clearTimeout(id));
+      this.activeTimeouts.clear();
+      this.activePanners.forEach((node) => { try { node.disconnect(); } catch (_) {} });
+      this.activePanners.clear();
+      this.activeScheduledNodes.forEach((nodes) => nodes.forEach((node) => {
+        try {
+          if (typeof node.stop === "function") node.stop(now);
+          else if (typeof node.disconnect === "function") node.disconnect();
+        } catch (_) {}
+      }));
+      this.activeScheduledNodes.clear();
     }
     playCreatureEcho(delaySec = 0, pan = 0, distNorm = 0) {
       if (!this.enabled || !this.ctx) return;
@@ -241,7 +294,7 @@
       const osc = c.createOscillator(), lfo = c.createOscillator();
       const vibrato = c.createGain(), filter = c.createBiquadFilter();
       const gain = c.createGain(), panner = this.spatialPan(pan);
-      if (panner) setTimeout(() => panner.disconnect(), 700);
+      if (panner) this.trackTimeout(() => { panner.disconnect(); this.activePanners.delete(panner); }, 700);
       const volume = 0.12 * (1 - Math.min(1, distNorm) * 0.78);
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(220, now);
@@ -254,13 +307,14 @@
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.52);
       lfo.connect(vibrato).connect(osc.frequency);
       osc.connect(filter).connect(gain).connect(panner || this.master);
+      this.trackScheduled(osc, lfo, gain, panner);
       lfo.start(now); osc.start(now); osc.stop(now + 0.56); lfo.stop(now + 0.56);
     }
     playCreatureVocalization(type, pan = 0, distNorm = 0) {
       if (!this.enabled || !this.ctx) return;
       if (type === "HUNTER") return this.playMagnetarLock(pan, distNorm);
       const c = this.ctx, now = c.currentTime, panner = this.spatialPan(pan);
-      if (panner) setTimeout(() => panner.disconnect(), 1500);
+      if (panner) this.trackTimeout(() => { panner.disconnect(); this.activePanners.delete(panner); }, 1500);
       const out = panner || this.master, distanceGain = 1 - Math.min(1, distNorm) * 0.72;
       const voice = (freq, end, duration, wave, volume, filterHz, start = now) => {
         const o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
@@ -282,7 +336,7 @@
     playDecoyPing(pan = 0, distNorm = 0) {
       if (!this.enabled || !this.ctx) return;
       const c = this.ctx, now = c.currentTime, out = this.spatialPan(pan) || this.master;
-      if (out !== this.master) setTimeout(() => out.disconnect(), 500);
+      if (out !== this.master) this.trackTimeout(() => { out.disconnect(); this.activePanners.delete(out); }, 500);
       [[920, 0], [1380, 0.14]].forEach(([freq, delay]) => {
         const o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
         const start = now + delay;
@@ -293,7 +347,9 @@
         g.gain.setValueAtTime(0.001, start);
         g.gain.linearRampToValueAtTime(Number.isFinite(volume) ? volume : 0, start + 0.018);
         g.gain.exponentialRampToValueAtTime(0.001, start + 0.24);
-        o.connect(f).connect(g).connect(out); o.start(start); o.stop(start + 0.27);
+        o.connect(f).connect(g).connect(out);
+        this.trackScheduled(o, g, out !== this.master ? out : null);
+        o.start(start); o.stop(start + 0.27);
       });
     }
     contact() {

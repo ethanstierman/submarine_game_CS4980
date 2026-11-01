@@ -98,6 +98,20 @@ body {
 }
 .assist-toggle { color: #b7d8c8; cursor: pointer; }
 .assist-toggle[aria-pressed="false"] { opacity: .65; }
+.run-menu { display: none; align-items: center; gap: 7px; }
+.run-menu button,
+.pause-actions button {
+  border: 1px solid #4c7775;
+  background: #071a20e8;
+  color: #a9d8c8;
+  padding: 9px 10px;
+  font: 9px "DM Mono", monospace;
+  letter-spacing: .06em;
+  cursor: pointer;
+}
+.run-menu button:hover,
+.pause-actions button:hover { border-color: #a2dfc4; color: #e0f4df; background: #123039; }
+body.in-game .run-menu { display: flex; }
 .briefing {
   flex: 1;
   min-height: 630px;
@@ -537,6 +551,8 @@ body {
 .pause-legend i { width: 11px; height: 11px; display: inline-block; border-radius: 50%; }
 .legend-rock { background: #63d6dc; }.legend-mine { background: #f0a65e; }.legend-bio { background: #d69af2; }.legend-relay { background: #75f2dc; box-shadow: 0 0 8px #75f2dc; }.legend-exit { background: #72e6c9; }
 .pause-legend small { margin-top: 10px; color: #78979a; }
+.pause-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 4px; }
+.pause-actions button { min-width: 270px; padding: 11px 14px; }
 .canvas-wrap canvas {
   display: block;
   width: 100%;
@@ -1004,11 +1020,16 @@ body {
     padding: 0 18px;
   }
   .topbar {
-    height: 64px;
+    height: auto;
     gap: 5px;
+    flex-wrap: wrap;
+    min-height: 64px;
   }
   .brand { gap: 6px; font-size: 8px; }
   .sound-toggle { padding: 7px 6px; font-size: 8px; letter-spacing: .04em; }
+  .run-menu { gap: 4px; }
+  body.in-game .run-menu { flex-basis: 100%; justify-content: flex-end; }
+  .run-menu button { padding: 7px 5px; font-size: 7px; letter-spacing: 0; }
   .mission-tag {
     display: none;
   }

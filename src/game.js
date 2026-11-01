@@ -7,6 +7,7 @@
     radar = $("radar"),
     rctx = radar.getContext("2d");
   let pixelRatio = 1;
+  let gameState = "HOME";
   const world = new GameWorld();
   const SAVE_KEY = "abyssal_reckoning_save_v1";
   let active = false,
@@ -112,11 +113,15 @@
   }
   window.addEventListener("resize", resize);
   function start(level = selectedLevel) {
+    GameAudio.resumeLoops();
     selectedLevel = level;
     world.reset(level);
+    world.paused = false;
     world.player.estX = world.player.x;
     world.player.estY = world.player.y;
     active = true;
+    gameState = "PLAYING";
+    document.body.classList.add("in-game");
     last = performance.now();
     keys = {};
     pendingPing = false;
@@ -124,6 +129,7 @@
     $("mission-briefing").classList.add("hidden");
     $("play-screen").classList.remove("hidden");
     $("end-modal").classList.add("hidden");
+    $("pause-legend").classList.add("hidden");
     $("mission-status").textContent = "IN TRANSIT";
     $("pause-button").innerHTML = "Ⅱ <span>PAUSE MISSION</span>";
     $("tactical-comms").textContent = level.banner;
@@ -133,11 +139,12 @@
     requestAnimationFrame(frame);
   }
   function frame(now) {
-    if (!active) return;
-    if (world.paused) {
-      draw(now);
+    if (gameState !== "PLAYING") {
+      GameAudio.stopAllLoops();
+      if (active && gameState === "PAUSED") draw(now);
       return;
     }
+    if (!active) return;
     const dt = Math.min(0.04, (now - last) / 1000 || 0);
     last = now;
     const input = { ping: pendingPing };
@@ -159,7 +166,11 @@
     requestAnimationFrame(frame);
   }
   function processEvents() {
-    for (const e of world.events.splice(0)) {
+    const pendingEvents = world.events.splice(0);
+    const events = world.over && !world.won
+      ? pendingEvents.filter((event) => event.type === "lose")
+      : pendingEvents;
+    for (const e of events) {
       if (e.type === "ping") {
         const ping = world.pings[world.pings.length - 1];
         playSonarAudio(ping);
@@ -564,6 +575,9 @@
       : "IN TRANSIT";
   }
   function showEnd() {
+    GameAudio.stopAllLoops();
+    gameState = "ENDED";
+    document.body.classList.remove("in-game");
     const won = world.won,
       p = world.player,
       time = world.elapsed,
@@ -600,14 +614,26 @@
     );
     $("end-modal").classList.remove("hidden");
   }
-  function showBriefing() {
+  function exitToMenu() {
+    GameAudio.stopAllLoops();
     active = false;
+    gameState = "HOME";
+    document.body.classList.remove("in-game");
+    world.paused = false;
+    world.decoys = [];
+    world.pings = [];
+    world.echoDots = [];
+    world.enemies = [];
+    world.events = [];
+    world.noiseEvents = [];
     $("play-screen").classList.add("hidden");
     $("briefing").classList.remove("hidden");
     $("end-modal").classList.add("hidden");
     $("mission-briefing").classList.add("hidden");
+    $("pause-legend").classList.add("hidden");
     renderMissions();
   }
+  function showBriefing() { exitToMenu(); }
   function enemyIntel(level) {
     if (level.briefingIntel) return level.briefingIntel;
     if (level.pylonCount) return `${level.pylonCount} dormant Floodlight Pylons are distributed along the descent. Sonar returns reveal their crystal signatures; the active 260-meter domes repel Shade Stalkers, and first-time relay activations recharge sonar.`;
@@ -638,6 +664,12 @@
     return logLines[seed % logLines.length];
   }
   function openMissionBriefing(level = selectedLevel) {
+    GameAudio.stopAllLoops();
+    active = false;
+    gameState = "BRIEFING";
+    document.body.classList.remove("in-game");
+    $("play-screen").classList.add("hidden");
+    $("end-modal").classList.add("hidden");
     selectedLevel = level;
     $("briefing-depth").textContent = level.depth === "DAILY" ? "DAILY DEPTH · SEEDED RUN" : `${level.depth} METERS · ${level.title}`;
     $("briefing-title").textContent = level.title;
@@ -672,7 +704,9 @@
     renderMissions();
   }
   function togglePause() {
+    if (!active || world.over) return;
     world.paused = !world.paused;
+    gameState = world.paused ? "PAUSED" : "PLAYING";
     $("pause-legend").classList.toggle("hidden", !world.paused);
     $("pause-button").innerHTML = world.paused
       ? "▶ <span>RESUME MISSION</span>"
@@ -681,6 +715,8 @@
       last = performance.now();
       requestAnimationFrame(frame);
     } else {
+      GameAudio.stopAllLoops();
+      keys = {};
       showToast("MISSION PAUSED");
     }
   }
@@ -703,20 +739,20 @@
       start(selectedLevel);
       return;
     }
-    if (controlKey[k]) {
+    if (controlKey[k] && gameState === "PLAYING") {
       keys[controlKey[k]] = true;
       e.preventDefault();
     }
     if (e.code === "Space") {
       e.preventDefault();
-      if (active && !world.over) triggerSonarPing(world.player.x, world.player.y, true);
+      if (gameState === "PLAYING" && active && !world.over) triggerSonarPing(world.player.x, world.player.y, true);
       else if (world.over && !world.won) openMissionBriefing(selectedLevel);
     }
-    if (k === "q" && active && world.addDecoy()) {
+    if (k === "q" && gameState === "PLAYING" && active && world.addDecoy()) {
       GameAudio.decoy();
       showToast(`DECOY RELEASED — ${world.player.decoys} REMAINING`);
     }
-    if (k === "f" && active) {
+    if (k === "f" && gameState === "PLAYING" && active) {
       if (selectedLevel.levelRules?.lampDisabled) {
         GameAudio.tone({ freq: 180, end: 72, duration: .12, type: "square", volume: .045 });
         showToast("[OPTICS SHATTERED: LAMP OFFLINE]");
@@ -727,8 +763,10 @@
         world.player.lamp ? "LAMP ONLINE — BATTERY DRAINING" : "LAMP OFF",
       );
     }
-    if (k === "e" && active) world.severTether();
-    if ((k === "escape" || k === "p") && active) togglePause();
+    if (k === "e" && gameState === "PLAYING" && active) world.severTether();
+    if ((k === "escape" || k === "p") && active) { e.preventDefault(); togglePause(); }
+    if (k === "q" && gameState === "PAUSED") exitToMenu();
+    if (k === "r" && gameState === "PAUSED") openMissionBriefing(selectedLevel);
     if (k === "m") {
       soundOn = !soundOn;
       if (soundOn) GameAudio.enable(); else GameAudio.toggle();
@@ -737,7 +775,7 @@
     }
   });
   canvas.addEventListener("click", (e) => {
-    if (!active || world.over || e.button !== 0) return;
+    if (gameState !== "PLAYING" || !active || world.over || e.button !== 0) return;
     triggerSonarPing(world.player.x, world.player.y, true);
   });
   window.addEventListener("keyup", (e) => {
@@ -763,6 +801,11 @@
   $("return-to-deck").addEventListener("click", showBriefing);
   $("dive-log").addEventListener("click", showBriefing);
   $("pause-button").addEventListener("click", togglePause);
+  $("hud-abort").addEventListener("click", () => { if (gameState === "PLAYING") togglePause(); });
+  $("hud-home").addEventListener("click", exitToMenu);
+  $("pause-resume").addEventListener("click", togglePause);
+  $("pause-retry").addEventListener("click", () => openMissionBriefing(selectedLevel));
+  $("pause-home").addEventListener("click", exitToMenu);
   $("sound-toggle").addEventListener("click", () => {
     soundOn = !soundOn;
     if (soundOn) GameAudio.enable();

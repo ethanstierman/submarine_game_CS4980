@@ -12,7 +12,7 @@
       content="Abyssal Reckoning — an acoustic stealth submarine game."
     />
     <title>Abyssal Reckoning</title>
-    <link rel="stylesheet" href="style.css?v=blackout-relays-20261101-7" />
+    <link rel="stylesheet" href="style.css?v=abort-audio-cleanup-20261101-10" />
   </head>
   <body>
     <main class="game-shell">
@@ -33,6 +33,10 @@
           SOUND <span id="sound-state">OFF</span>
         </button>
         <button class="sound-toggle assist-toggle" id="assist-toggle" type="button" aria-pressed="true">AUDIO-VISUAL ASSIST <span>ON</span></button>
+        <div class="run-menu" aria-label="Dive menu">
+          <button id="hud-abort" type="button">[ ESC / ABORT TO DECK ]</button>
+          <button id="hud-home" type="button">[ HOME MENU ]</button>
+        </div>
       </header>
 
       <section class="briefing" id="briefing" aria-labelledby="title">
@@ -132,6 +136,11 @@
         <div class="pause-legend hidden" id="pause-legend" role="dialog" aria-label="Acoustic color legend">
           <strong>MISSION PAUSED · ACOUSTIC LEGEND</strong>
           <span><i class="legend-rock"></i> ROCK RETURN</span><span><i class="legend-mine"></i> MINE !</span><span><i class="legend-bio"></i> FLESH</span><span><i class="legend-relay"></i> RELAY PYLON</span><span><i class="legend-exit"></i> EXIT BEACON</span>
+          <div class="pause-actions">
+            <button id="pause-resume" type="button">[ RESUME DIVE (ESC) ]</button>
+            <button id="pause-retry" type="button">[ RETRY DEPTH (R) ]</button>
+            <button id="pause-home" type="button">[ ABORT TO HOME MENU (Q / CLICK) ]</button>
+          </div>
           <small>ESC / P TO RESUME · M TO MUTE</small>
         </div>
         </div>
@@ -270,8 +279,8 @@
         ><span>BUILT FOR THE DEEP <b>///</b> PHASE 01</span>
       </footer>
     </main>
-    <script src="audio.js?v=blackout-relays-20261101-7"></script>
-    <script src="world.js?v=blackout-relays-20261101-7"></script>
-    <script src="game.js?v=blackout-relays-20261101-7"></script>
+    <script src="audio.js?v=abort-audio-cleanup-20261101-10"></script>
+    <script src="world.js?v=abort-audio-cleanup-20261101-10"></script>
+    <script src="game.js?v=abort-audio-cleanup-20261101-10"></script>
   </body>
 </html>
